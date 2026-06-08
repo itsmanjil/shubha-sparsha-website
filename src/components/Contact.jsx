@@ -19,14 +19,37 @@ export default function Contact() {
     setStatus('loading')
     setErrorMsg('')
 
-    const { error } = await supabase.from('contacts').insert([form])
-
-    if (error) {
-      setErrorMsg(error.message)
+    // 1. Save to Supabase database
+    const { error: dbError } = await supabase.from('contacts').insert([form])
+    if (dbError) {
+      setErrorMsg(dbError.message)
       setStatus('error')
-    } else {
-      setStatus('success')
+      return
     }
+
+    // 2. Send email notification via Web3Forms
+    const emailRes = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: import.meta.env.VITE_WEB3FORMS_KEY,
+        subject: `New Enquiry from ${form.name} — ${form.event_type || 'Event Planning'}`,
+        from_name: 'Shubha Sparsha Website',
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        event_type: form.event_type,
+        message: form.message,
+      }),
+    })
+
+    const emailData = await emailRes.json()
+    if (!emailData.success) {
+      // DB saved successfully — don't block the user, just log the email failure
+      console.warn('Email notification failed:', emailData.message)
+    }
+
+    setStatus('success')
   }
 
   return (
@@ -69,7 +92,7 @@ export default function Contact() {
               </h3>
               <p
                 className="mb-10 leading-relaxed"
-                style={{ color: '#f7ecd0/70', fontFamily: "'Lato', sans-serif", fontWeight: 300, opacity: 0.7 }}
+                style={{ color: 'rgba(247,236,208,0.7)', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
               >
                 Share your vision and we'll craft something truly unforgettable together.
               </p>
@@ -83,7 +106,7 @@ export default function Contact() {
                 ].map((item) => (
                   <div key={item.label} className="flex gap-4 items-start">
                     <div
-                      className="w-10 h-10 flex items-center justify-center flex-shrink-0 mt-0.5"
+                      className="w-10 h-10 flex items-center justify-center flex-shrink-0"
                       style={{ background: 'rgba(212,175,55,0.15)', color: '#d4af37' }}
                     >
                       {item.icon}
@@ -99,7 +122,6 @@ export default function Contact() {
                         href={item.href}
                         target={item.href.startsWith('http') ? '_blank' : undefined}
                         rel="noopener noreferrer"
-                        className="hover:text-gold-400 transition-colors"
                         style={{ color: '#f7ecd0', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
                       >
                         {item.value}
@@ -108,27 +130,6 @@ export default function Contact() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div
-              className="mt-10 pt-8"
-              style={{ borderTop: '1px solid rgba(212,175,55,0.2)' }}
-            >
-              <p
-                className="text-xs tracking-[0.3em] uppercase mb-3"
-                style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
-              >
-                Follow Our Work
-              </p>
-              <a
-                href="https://www.instagram.com/shubhasparshanp/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm"
-                style={{ color: '#f7ecd0', fontFamily: "'Lato', sans-serif", opacity: 0.8 }}
-              >
-                <FiInstagram style={{ color: '#d4af37' }} /> @shubhasparshanp
-              </a>
             </div>
           </div>
 
@@ -167,13 +168,8 @@ export default function Contact() {
                       value={form.name}
                       onChange={handleChange}
                       placeholder="Your name"
-                      className="w-full px-4 py-3 border-b-2 bg-transparent focus:outline-none transition-colors"
-                      style={{
-                        borderColor: '#d4af37/30',
-                        color: '#2a0000',
-                        fontFamily: "'Lato', sans-serif",
-                        borderBottomColor: 'rgba(212,175,55,0.4)',
-                      }}
+                      className="w-full px-4 py-3 bg-transparent focus:outline-none"
+                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                   <div>
@@ -190,12 +186,8 @@ export default function Contact() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="your@email.com"
-                      className="w-full px-4 py-3 border-b-2 bg-transparent focus:outline-none transition-colors"
-                      style={{
-                        borderBottomColor: 'rgba(212,175,55,0.4)',
-                        color: '#2a0000',
-                        fontFamily: "'Lato', sans-serif",
-                      }}
+                      className="w-full px-4 py-3 bg-transparent focus:outline-none"
+                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                 </div>
@@ -213,13 +205,9 @@ export default function Contact() {
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
-                      placeholder="+91 XXXXX XXXXX"
-                      className="w-full px-4 py-3 border-b-2 bg-transparent focus:outline-none transition-colors"
-                      style={{
-                        borderBottomColor: 'rgba(212,175,55,0.4)',
-                        color: '#2a0000',
-                        fontFamily: "'Lato', sans-serif",
-                      }}
+                      placeholder="+977 XXXXXXXXXX"
+                      className="w-full px-4 py-3 bg-transparent focus:outline-none"
+                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                   <div>
@@ -233,17 +221,11 @@ export default function Contact() {
                       name="event_type"
                       value={form.event_type}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border-b-2 bg-transparent focus:outline-none transition-colors"
-                      style={{
-                        borderBottomColor: 'rgba(212,175,55,0.4)',
-                        color: form.event_type ? '#2a0000' : '#9ca3af',
-                        fontFamily: "'Lato', sans-serif",
-                      }}
+                      className="w-full px-4 py-3 bg-transparent focus:outline-none"
+                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: form.event_type ? '#2a0000' : '#9ca3af', fontFamily: "'Lato', sans-serif" }}
                     >
                       <option value="">Select event type</option>
-                      {eventTypes.map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
+                      {eventTypes.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                 </div>
@@ -262,12 +244,8 @@ export default function Contact() {
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Share your vision, preferred dates, approximate guest count…"
-                    className="w-full px-4 py-3 border-b-2 bg-transparent focus:outline-none resize-none transition-colors"
-                    style={{
-                      borderBottomColor: 'rgba(212,175,55,0.4)',
-                      color: '#2a0000',
-                      fontFamily: "'Lato', sans-serif",
-                    }}
+                    className="w-full px-4 py-3 bg-transparent focus:outline-none resize-none"
+                    style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
                   />
                 </div>
 
@@ -279,11 +257,7 @@ export default function Contact() {
                   type="submit"
                   disabled={status === 'loading'}
                   className="flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5 disabled:opacity-60"
-                  style={{
-                    background: 'linear-gradient(135deg, #800000, #550000)',
-                    color: '#f7ecd0',
-                    fontFamily: "'Lato', sans-serif",
-                  }}
+                  style={{ background: 'linear-gradient(135deg, #800000, #550000)', color: '#f7ecd0', fontFamily: "'Lato', sans-serif" }}
                 >
                   <FiSend />
                   {status === 'loading' ? 'Sending…' : 'Send Enquiry'}

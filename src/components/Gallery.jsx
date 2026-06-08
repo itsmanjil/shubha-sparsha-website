@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react'
-import { FiInstagram, FiExternalLink, FiUploadCloud, FiImage } from 'react-icons/fi'
+import { FiInstagram, FiExternalLink, FiImage } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../context/AuthContext'
 
 const categories = ['All', 'Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 export default function Gallery() {
-  const { user } = useAuth()
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')
-  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     fetchImages()
@@ -28,27 +25,6 @@ export default function Gallery() {
       .select('*')
       .order('created_at', { ascending: false })
     if (!error && data) setImages(data)
-  }
-
-  async function handleUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploading(true)
-
-    const fileName = `${Date.now()}-${file.name}`
-    const { error: uploadError } = await supabase.storage
-      .from('gallery')
-      .upload(fileName, file)
-
-    if (!uploadError) {
-      const { data: { publicUrl } } = supabase.storage
-        .from('gallery')
-        .getPublicUrl(fileName)
-      await supabase.from('gallery').insert([{ image_url: publicUrl, title: file.name, category: 'All' }])
-    }
-
-    setUploading(false)
-    e.target.value = ''
   }
 
   const filtered = filter === 'All' ? images : images.filter((img) => img.category === filter)
@@ -98,25 +74,6 @@ export default function Gallery() {
           </div>
         </div>
 
-        {/* Admin upload */}
-        {user && (
-          <div className="mb-8 flex justify-center">
-            <label
-              className={`cursor-pointer flex items-center gap-2 px-6 py-3 text-sm tracking-widest uppercase transition-all ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
-              style={{
-                background: 'linear-gradient(135deg, #d4af37, #b8960c)',
-                color: '#2a0000',
-                fontFamily: "'Lato', sans-serif",
-                fontWeight: 700,
-              }}
-            >
-              <FiUploadCloud />
-              {uploading ? 'Uploading…' : 'Upload Photo'}
-              <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-            </label>
-          </div>
-        )}
-
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
           {filtered.map((img) => (
@@ -136,12 +93,11 @@ export default function Gallery() {
                 className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{ background: 'rgba(42,0,0,0.7)' }}
               >
-                <FiExternalLink className="text-gold-400 text-3xl" style={{ color: '#d4af37' }} />
+                <FiExternalLink className="text-3xl" style={{ color: '#d4af37' }} />
               </div>
             </a>
           ))}
 
-          {/* Placeholder tiles */}
           {Array.from({ length: placeholderCount }).map((_, i) => (
             <div
               key={`ph-${i}`}
