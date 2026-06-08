@@ -77,7 +77,7 @@ export default function Contact() {
               <div className="space-y-6">
                 {[
                   { icon: <FiInstagram />, label: 'Instagram', value: '@shubhasparshanp', href: 'https://www.instagram.com/shubhasparshanp/' },
-                  { icon: <FiMail />, label: 'Email', value: 'contact@shubhasparsha.com', href: 'mailto:contact@shubhasparsha.com' },
+                  { icon: <FiMail />, label: 'Email', value: 'shubhasparshanp@gmail.com', href: 'mailto:shubhasparshanp@gmail.com' },
                   { icon: <FiPhone />, label: 'Phone', value: '+977 9852052172', href: 'tel:+9779852052172' },
                   { icon: <FiMapPin />, label: 'Location', value: 'Nepal', href: '#' },
                 ].map((item) => (

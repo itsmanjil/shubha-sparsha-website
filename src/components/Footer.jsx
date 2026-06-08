@@ -82,12 +82,12 @@ export default function Footer() {
                 @shubhasparshanp
               </a>
               <a
-                href="mailto:contact@shubhasparsha.com"
+                href="mailto:shubhasparshanp@gmail.com"
                 className="flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
                 style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif" }}
               >
                 <FiMail style={{ color: '#d4af37' }} />
-                contact@shubhasparsha.com
+                shubhasparshanp@gmail.com
               </a>
             </div>
           </div>
