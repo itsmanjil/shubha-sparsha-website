@@ -7,10 +7,10 @@ const stats = [
 
 export default function About() {
   return (
-    <section id="about" className="py-28" style={{ background: '#fffdf5' }}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="about" className="py-16 md:py-28" style={{ background: '#fffdf5' }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Section header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
@@ -31,7 +31,7 @@ export default function About() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-12 md:mb-20">
           {/* Image placeholder — replace with real photo */}
           <div className="relative">
             <div
@@ -50,7 +50,7 @@ export default function About() {
             </div>
             {/* Gold accent border */}
             <div
-              className="absolute -bottom-4 -right-4 w-full h-full border-2 -z-10"
+              className="absolute -bottom-4 -right-4 w-full h-full border-2 -z-10 hidden sm:block"
               style={{ borderColor: '#d4af37' }}
             />
           </div>
@@ -107,7 +107,7 @@ export default function About() {
               style={{ background: '#2a0000' }}
             >
               <p
-                className="text-4xl font-bold mb-2"
+                className="text-3xl md:text-4xl font-bold mb-2"
                 style={{ fontFamily: "'Playfair Display', serif", color: '#d4af37' }}
               >
                 {s.value}

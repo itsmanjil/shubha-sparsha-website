@@ -9,8 +9,8 @@ export default function Footer() {
       {/* Top gold line */}
       <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }} />
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-10 md:mb-12">
           {/* Brand */}
           <div>
             <p

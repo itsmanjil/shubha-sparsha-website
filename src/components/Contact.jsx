@@ -53,10 +53,10 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-28" style={{ background: '#fffdf5' }}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="contact" className="py-16 md:py-28" style={{ background: '#fffdf5' }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
@@ -77,10 +77,10 @@ export default function Contact() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-12">
+        <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Info panel */}
           <div
-            className="lg:col-span-2 p-10 flex flex-col justify-between"
+            className="lg:col-span-2 p-6 md:p-10 flex flex-col justify-between"
             style={{ background: '#2a0000' }}
           >
             <div>
@@ -137,7 +137,7 @@ export default function Contact() {
           <div className="lg:col-span-3">
             {status === 'success' ? (
               <div
-                className="h-full flex flex-col items-center justify-center text-center p-16 border"
+                className="h-full flex flex-col items-center justify-center text-center p-8 md:p-16 border"
                 style={{ borderColor: '#d4af37' }}
               >
                 <div className="text-5xl mb-6">✨</div>

@@ -29,10 +29,10 @@ export default function Navbar() {
       }`}
       style={{ background: scrolled ? 'rgba(85,0,0,0.95)' : 'transparent' }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="text-left">
           <span
-            className="font-serif text-xl font-semibold tracking-widest"
+            className="font-serif text-lg md:text-xl font-semibold tracking-widest"
             style={{ color: '#d4af37', fontFamily: "'Playfair Display', serif" }}
           >
             Shubha Sparsha
@@ -95,7 +95,7 @@ export default function Navbar() {
       {/* Mobile drawer */}
       {open && (
         <div
-          className="lg:hidden px-6 pb-8 pt-4"
+          className="lg:hidden px-4 md:px-6 pb-8 pt-4"
           style={{ background: '#550000', borderTop: '1px solid rgba(212,175,55,0.2)' }}
         >
           <ul className="flex flex-col gap-5">

@@ -31,10 +31,10 @@ export default function Gallery() {
   const placeholderCount = Math.max(0, 6 - filtered.length)
 
   return (
-    <section id="gallery" className="py-28" style={{ background: '#2a0000' }}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="gallery" className="py-16 md:py-28" style={{ background: '#2a0000' }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 md:mb-16">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}

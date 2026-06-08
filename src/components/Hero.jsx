@@ -28,9 +28,9 @@ export default function Hero() {
       <div className="absolute bottom-10 left-10 w-16 h-16 border-b-2 border-l-2 border-gold-400/40 hidden md:block" />
       <div className="absolute bottom-10 right-10 w-16 h-16 border-b-2 border-r-2 border-gold-400/40 hidden md:block" />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-6 text-center">
         {/* Gold divider */}
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex items-center justify-center gap-4 mb-6 md:mb-8">
           <div className="h-px w-16 bg-gradient-to-r from-transparent to-gold-400" />
           <span className="text-gold-400 text-sm tracking-[0.4em] uppercase" style={{ fontFamily: "'Lato', sans-serif" }}>
             Est. Since Love
@@ -39,7 +39,7 @@ export default function Hero() {
         </div>
 
         <h1
-          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
           style={{ fontFamily: "'Playfair Display', serif", color: '#f7ecd0' }}
         >
           Crafting{' '}
@@ -57,7 +57,7 @@ export default function Hero() {
         </div>
 
         <p
-          className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed"
+          className="text-base md:text-xl text-white/70 mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed"
           style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
         >
           From intimate gatherings to grand celebrations — we orchestrate every
@@ -70,7 +70,7 @@ export default function Hero() {
             smooth
             duration={600}
             offset={-80}
-            className="cursor-pointer px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:scale-105"
+            className="cursor-pointer px-8 md:px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:scale-105"
             style={{
               background: 'linear-gradient(135deg, #d4af37, #b8960c)',
               color: '#2a0000',
@@ -83,7 +83,7 @@ export default function Hero() {
             href="https://www.instagram.com/shubhasparshanp/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border border-gold-400/60 text-gold-400 hover:bg-gold-400/10 transition-all duration-300"
+            className="flex items-center justify-center gap-2 px-8 md:px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border border-gold-400/60 text-gold-400 hover:bg-gold-400/10 transition-all duration-300"
             style={{ fontFamily: "'Lato', sans-serif" }}
           >
             <FiInstagram />

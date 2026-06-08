@@ -45,10 +45,10 @@ const services = [
 
 export default function Services() {
   return (
-    <section id="services" className="py-28" style={{ background: '#fdf8ee' }}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="services" className="py-16 md:py-28" style={{ background: '#fdf8ee' }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Section header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
@@ -87,7 +87,7 @@ export default function Services() {
                 style={{ background: 'linear-gradient(90deg, #d4af37, #b8960c)' }}
               />
 
-              <div className="p-8">
+              <div className="p-5 md:p-8">
                 <div className="text-4xl mb-5">{s.emoji}</div>
 
                 <p
