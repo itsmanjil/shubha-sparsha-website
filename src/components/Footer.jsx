@@ -104,7 +104,7 @@ export default function Footer() {
             <span style={{ color: '#d4af37', opacity: 0.6 }}>✦</span>
             <div className="h-px w-8" style={{ background: '#d4af37', opacity: 0.4 }} />
           </div>
-          <p>Crafted with love in India</p>
+          <p>Crafted with love in Nepal</p>
         </div>
       </div>
     </footer>
