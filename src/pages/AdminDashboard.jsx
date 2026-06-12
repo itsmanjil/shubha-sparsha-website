@@ -26,7 +26,7 @@ const ADMIN_CSS = `
       display: flex !important; overflow-x: auto; -webkit-overflow-scrolling: touch;
     }
     .admin-sidebar button {
-      flex-shrink: 0 !important; text-align: center !important;
+      width: auto !important; flex-shrink: 0 !important; text-align: center !important;
       padding: 0.75rem 1rem !important; white-space: nowrap !important;
       border-left: 3px solid transparent !important;
       border-bottom: 3px solid transparent !important;
