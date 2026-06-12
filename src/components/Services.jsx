@@ -2,7 +2,7 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 
 export default function Services() {
   const { config } = useSiteConfig()
-  const { colors, services } = config
+  const { colors, services, servicesSection } = config
 
   return (
     <section id="services" className="py-16 md:py-28" style={{ background: '#fdf8ee' }}>
@@ -13,13 +13,13 @@ export default function Services() {
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
           >
-            What We Do
+            {servicesSection.label}
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
             style={{ fontFamily: "'Playfair Display', serif", color: colors.maroon }}
           >
-            Our <em style={{ color: colors.maroon500 }}>Services</em>
+            {servicesSection.title} <em style={{ color: colors.maroon500 }}>{servicesSection.titleAccent}</em>
           </h2>
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-16" style={{ background: colors.gold }} />
@@ -30,11 +30,11 @@ export default function Services() {
             className="text-gray-600 max-w-xl mx-auto text-lg"
             style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
           >
-            Comprehensive event planning services tailored to your vision and traditions.
+            {servicesSection.desc}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {services.map((s) => (
             <div
               key={s.title}

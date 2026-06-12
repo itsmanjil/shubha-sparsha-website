@@ -81,7 +81,7 @@ export default function About() {
               className="inline-flex items-center gap-3 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5"
               style={{ color: colors.maroon500, fontFamily: "'Lato', sans-serif" }}
             >
-              Follow Our Journey
+              {about.followLinkText}
               <span
                 className="h-px w-12 inline-block transition-all duration-300"
                 style={{ background: colors.maroon500 }}
@@ -98,7 +98,7 @@ export default function About() {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="text-center py-10 px-6"
+              className="text-center py-8 px-3 md:py-10 md:px-6"
               style={{ background: colors.maroon }}
             >
               <p

@@ -10,7 +10,7 @@ const eventTypes = [
 
 export default function Contact() {
   const { config } = useSiteConfig()
-  const { colors, contactInfo } = config
+  const { colors, contactInfo, contactSection } = config
 
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', message: '' })
   const [status, setStatus] = useState('idle')
@@ -84,14 +84,14 @@ export default function Contact() {
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
           >
-            Let's Plan Together
+            {contactSection.label}
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
             style={{ fontFamily: "'Playfair Display', serif", color: colors.maroon }}
           >
-            Begin Your{' '}
-            <em style={{ color: colors.maroon500 }}>Celebration</em>
+            {contactSection.title}{' '}
+            <em style={{ color: colors.maroon500 }}>{contactSection.titleAccent}</em>
           </h2>
           <div className="flex items-center justify-center gap-4">
             <div className="h-px w-16" style={{ background: colors.gold }} />
@@ -100,10 +100,10 @@ export default function Contact() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-5 gap-8 md:gap-12">
           {/* Info panel */}
           <div
-            className="lg:col-span-2 p-6 md:p-10 flex flex-col justify-between"
+            className="md:col-span-2 p-6 md:p-10 flex flex-col justify-between"
             style={{ background: colors.maroon }}
           >
             <div>
@@ -111,13 +111,13 @@ export default function Contact() {
                 className="text-2xl font-bold mb-6"
                 style={{ fontFamily: "'Playfair Display', serif", color: '#f7ecd0' }}
               >
-                Get In Touch
+                {contactSection.sidebarHeading}
               </h3>
               <p
                 className="mb-10 leading-relaxed"
                 style={{ color: 'rgba(247,236,208,0.7)', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
               >
-                Share your vision and we'll craft something truly unforgettable together.
+                {contactSection.sidebarSubtitle}
               </p>
 
               <div className="space-y-6">
@@ -152,7 +152,7 @@ export default function Contact() {
           </div>
 
           {/* Form */}
-          <div className="lg:col-span-3">
+          <div className="md:col-span-3">
             {status === 'success' ? (
               <div
                 className="h-full flex flex-col items-center justify-center text-center p-8 md:p-16 border"
@@ -274,11 +274,11 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5 disabled:opacity-60"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5 disabled:opacity-60"
                   style={{ background: `linear-gradient(135deg, ${colors.maroon500}, #550000)`, color: '#f7ecd0', fontFamily: "'Lato', sans-serif" }}
                 >
                   <FiSend />
-                  {status === 'loading' ? 'Sending…' : 'Send Enquiry'}
+                  {status === 'loading' ? 'Sending…' : contactSection.submitButton}
                 </button>
               </form>
             )}

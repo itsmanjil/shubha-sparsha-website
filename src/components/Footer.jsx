@@ -22,18 +22,18 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <div className="grid md:grid-cols-3 gap-8 md:gap-12 mb-10 md:mb-12">
           {/* Brand */}
-          <div>
+          <div className="text-center md:text-left">
             <p
               className="text-2xl font-bold mb-1"
               style={{ fontFamily: "'Playfair Display', serif", color: colors.gold }}
             >
-              Shubha Sparsha
+              {footer.brandName}
             </p>
             <p
               className="text-xs tracking-[0.3em] uppercase mb-6"
               style={{ color: 'rgba(247,236,208,0.5)', fontFamily: "'Lato', sans-serif" }}
             >
-              Event Planning
+              {footer.brandSubtitle}
             </p>
             <p
               className="text-sm leading-relaxed"
@@ -44,7 +44,7 @@ export default function Footer() {
           </div>
 
           {/* Nav links */}
-          <div>
+          <div className="text-center md:text-left">
             <p
               className="text-xs tracking-[0.3em] uppercase mb-6"
               style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
@@ -73,7 +73,7 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="text-center md:text-left">
             <p
               className="text-xs tracking-[0.3em] uppercase mb-6"
               style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
@@ -85,30 +85,32 @@ export default function Footer() {
                 href={contactInfo.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
+                className="inline-flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
                 style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif" }}
               >
                 <FiInstagram style={{ color: colors.gold }} />
                 {contactInfo.instagramHandle}
               </a>
-              <a
-                href={`mailto:${contactInfo.email}`}
-                className="flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
-                style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif" }}
-              >
-                <FiMail style={{ color: colors.gold }} />
-                {contactInfo.email}
-              </a>
+              <div>
+                <a
+                  href={`mailto:${contactInfo.email}`}
+                  className="inline-flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
+                  style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif" }}
+                >
+                  <FiMail style={{ color: colors.gold }} />
+                  {contactInfo.email}
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div
-          className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs"
+          className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-center md:text-left"
           style={{ borderTop: `1px solid ${colors.gold}26`, color: 'rgba(247,236,208,0.4)', fontFamily: "'Lato', sans-serif" }}
         >
-          <p>&copy; {new Date().getFullYear()} Shubha Sparsha. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {footer.copyright}</p>
           <div className="flex items-center gap-2">
             <div className="h-px w-8" style={{ background: colors.gold, opacity: 0.4 }} />
             <span style={{ color: colors.gold, opacity: 0.6 }}>✦</span>
