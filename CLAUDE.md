@@ -20,7 +20,7 @@ Single-page React app (Vite + React 19 + Tailwind CSS v4). All sections live on 
 
 **Data flow:**
 - `src/lib/supabase.js` — single Supabase client instance, imported wherever DB access is needed
-- Contact form (`Contact.jsx`) does two things on submit: inserts to Supabase `contacts` table, then POSTs to Web3Forms API to email `shubhasparshanp@gmail.com`
+- Contact form (`Contact.jsx`) on submit: (1) inserts to Supabase `contacts` table — if this fails the form errors; (2) fires two emails in parallel as fire-and-forget via `Promise.allSettled`: Web3Forms notifies the admin (`shubhasparshanp@gmail.com`), EmailJS sends a confirmation to the visitor. Email failures are logged silently and never block the user.
 - Gallery (`Gallery.jsx`) reads from Supabase `gallery` table with a realtime subscription for live updates
 
 **Supabase schema:**
@@ -39,10 +39,13 @@ Single-page React app (Vite + React 19 + Tailwind CSS v4). All sections live on 
 ```
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
-VITE_WEB3FORMS_KEY      # 2da6cce3-... — sends email to shubhasparshanp@gmail.com
+VITE_WEB3FORMS_KEY          # sends admin notification to shubhasparshanp@gmail.com
+VITE_EMAILJS_SERVICE_ID     # EmailJS Gmail service ID
+VITE_EMAILJS_TEMPLATE_ID    # EmailJS template ID for visitor confirmation
+VITE_EMAILJS_PUBLIC_KEY     # EmailJS public key
 ```
 
-All three must also be set in Vercel project settings (`vercel env add`).
+All six must also be set in Vercel project settings (`vercel env add`).
 
 ## Deployment
 
