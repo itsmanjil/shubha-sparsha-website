@@ -11,6 +11,8 @@ const eventTypes = [
 export default function Contact() {
   const { config } = useSiteConfig()
   const { colors, contactInfo, contactSection } = config
+  const dt = colors.darkText || '#5c4604'
+  const lt = colors.lightText || '#f7ecd0'
 
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', message: '' })
   const [status, setStatus] = useState('idle')
@@ -115,7 +117,7 @@ export default function Contact() {
               </h3>
               <p
                 className="mb-10 leading-relaxed"
-                style={{ color: 'rgba(247,236,208,0.7)', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+                style={{ color: `${lt}b3`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
               >
                 {contactSection.sidebarSubtitle}
               </p>
@@ -140,7 +142,7 @@ export default function Contact() {
                         href={item.href}
                         target={item.href.startsWith('http') ? '_blank' : undefined}
                         rel="noopener noreferrer"
-                        style={{ color: '#f7ecd0', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+                        style={{ color: lt, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
                       >
                         {item.value}
                       </a>
@@ -165,7 +167,7 @@ export default function Contact() {
                 >
                   Thank You!
                 </h3>
-                <p style={{ color: '#5c4604', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}>
+                <p style={{ color: dt, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}>
                   We've received your enquiry. A confirmation has been sent to your email — we'll reach out within 24 hours to begin planning your celebration.
                 </p>
               </div>
@@ -175,7 +177,7 @@ export default function Contact() {
                   <div>
                     <label
                       className="block text-xs tracking-[0.2em] uppercase mb-2"
-                      style={{ color: '#7a5f06', fontFamily: "'Lato', sans-serif" }}
+                      style={{ color: dt, fontFamily: "'Lato', sans-serif" }}
                     >
                       Full Name *
                     </label>
@@ -193,7 +195,7 @@ export default function Contact() {
                   <div>
                     <label
                       className="block text-xs tracking-[0.2em] uppercase mb-2"
-                      style={{ color: '#7a5f06', fontFamily: "'Lato', sans-serif" }}
+                      style={{ color: dt, fontFamily: "'Lato', sans-serif" }}
                     >
                       Email Address *
                     </label>
@@ -214,7 +216,7 @@ export default function Contact() {
                   <div>
                     <label
                       className="block text-xs tracking-[0.2em] uppercase mb-2"
-                      style={{ color: '#7a5f06', fontFamily: "'Lato', sans-serif" }}
+                      style={{ color: dt, fontFamily: "'Lato', sans-serif" }}
                     >
                       Phone Number
                     </label>
@@ -231,7 +233,7 @@ export default function Contact() {
                   <div>
                     <label
                       className="block text-xs tracking-[0.2em] uppercase mb-2"
-                      style={{ color: '#7a5f06', fontFamily: "'Lato', sans-serif" }}
+                      style={{ color: dt, fontFamily: "'Lato', sans-serif" }}
                     >
                       Event Type
                     </label>
@@ -251,7 +253,7 @@ export default function Contact() {
                 <div>
                   <label
                     className="block text-xs tracking-[0.2em] uppercase mb-2"
-                    style={{ color: '#7a5f06', fontFamily: "'Lato', sans-serif" }}
+                    style={{ color: dt, fontFamily: "'Lato', sans-serif" }}
                   >
                     Tell Us About Your Dream Event *
                   </label>

@@ -13,6 +13,7 @@ const navLinks = [
 export default function Footer() {
   const { config } = useSiteConfig()
   const { colors, footer, contactInfo } = config
+  const lt = colors.lightText || '#f7ecd0'
 
   return (
     <footer style={{ background: colors.maroon }}>
@@ -31,13 +32,13 @@ export default function Footer() {
             </p>
             <p
               className="text-xs tracking-[0.3em] uppercase mb-6"
-              style={{ color: 'rgba(247,236,208,0.5)', fontFamily: "'Lato', sans-serif" }}
+              style={{ color: `${lt}80`, fontFamily: "'Lato', sans-serif" }}
             >
               {footer.brandSubtitle}
             </p>
             <p
               className="text-sm leading-relaxed"
-              style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+              style={{ color: `${lt}99`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
             >
               {footer.tagline}
             </p>
@@ -61,7 +62,7 @@ export default function Footer() {
                     offset={-80}
                     className="cursor-pointer text-sm capitalize transition-colors"
                     style={{
-                      color: 'rgba(247,236,208,0.6)',
+                      color: `${lt}99`,
                       fontFamily: "'Lato', sans-serif",
                     }}
                   >
@@ -86,7 +87,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
-                style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif" }}
+                style={{ color: `${lt}99`, fontFamily: "'Lato', sans-serif" }}
               >
                 <FiInstagram style={{ color: colors.gold }} />
                 {contactInfo.instagramHandle}
@@ -95,7 +96,7 @@ export default function Footer() {
                 <a
                   href={`mailto:${contactInfo.email}`}
                   className="inline-flex items-center gap-3 text-sm transition-opacity hover:opacity-100"
-                  style={{ color: 'rgba(247,236,208,0.6)', fontFamily: "'Lato', sans-serif" }}
+                  style={{ color: `${lt}99`, fontFamily: "'Lato', sans-serif" }}
                 >
                   <FiMail style={{ color: colors.gold }} />
                   {contactInfo.email}
@@ -108,7 +109,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-center md:text-left"
-          style={{ borderTop: `1px solid ${colors.gold}26`, color: 'rgba(247,236,208,0.4)', fontFamily: "'Lato', sans-serif" }}
+          style={{ borderTop: `1px solid ${colors.gold}26`, color: `${lt}66`, fontFamily: "'Lato', sans-serif" }}
         >
           <p>&copy; {new Date().getFullYear()} {footer.copyright}</p>
           <div className="flex items-center gap-2">

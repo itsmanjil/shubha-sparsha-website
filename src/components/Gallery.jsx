@@ -8,6 +8,7 @@ const categories = ['All', 'Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 export default function Gallery() {
   const { config } = useSiteConfig()
   const { colors, contactInfo, gallerySection } = config
+  const lt = colors.lightText || '#f7ecd0'
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')
 
@@ -46,7 +47,7 @@ export default function Gallery() {
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
-            style={{ fontFamily: "'Playfair Display', serif", color: colors.cream }}
+            style={{ fontFamily: "'Playfair Display', serif", color: lt }}
           >
             {gallerySection.title} <em style={{ color: colors.gold }}>{gallerySection.titleAccent}</em>
           </h2>

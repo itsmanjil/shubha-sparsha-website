@@ -6,6 +6,7 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 export default function Hero() {
   const { config } = useSiteConfig()
   const { colors, hero, contactInfo, heroSlides } = config
+  const lt = colors.lightText || '#f7ecd0'
   const slides = Array.isArray(heroSlides) ? heroSlides : []
   const hasSlides = slides.length > 0
   const interval = Math.max(2, hero.sliderInterval || 5) * 1000
@@ -89,7 +90,7 @@ export default function Hero() {
 
         <h1
           className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
-          style={{ fontFamily: "'Playfair Display', serif", color: '#f7ecd0' }}
+          style={{ fontFamily: "'Playfair Display', serif", color: lt }}
         >
           {hero.title}{' '}
           <span style={{ color: colors.gold }}>{hero.titleAccent}</span>
@@ -104,8 +105,8 @@ export default function Hero() {
         </div>
 
         <p
-          className="text-base md:text-xl text-white/70 mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed"
-          style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+          className="text-base md:text-xl mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed"
+          style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, color: `${lt}b3` }}
         >
           {hero.subtitle}
         </p>

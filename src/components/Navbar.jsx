@@ -16,6 +16,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const { config } = useSiteConfig()
   const { colors, navbar } = config
+  const lt = colors.lightText || '#f7ecd0'
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -27,7 +28,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{ background: scrolled ? `${colors.maroon500}f2` : 'transparent', backdropFilter: scrolled ? 'blur(8px)' : 'none' }}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
@@ -58,7 +59,7 @@ export default function Navbar() {
             </span>
             <span
               className="block text-xs tracking-[0.3em] uppercase"
-              style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Lato', sans-serif" }}
+              style={{ color: `${lt}99`, fontFamily: "'Lato', sans-serif" }}
             >
               {navbar.brandSubtitle}
             </span>
@@ -75,7 +76,7 @@ export default function Navbar() {
                 duration={600}
                 offset={-80}
                 className="cursor-pointer text-sm tracking-widest uppercase transition-colors"
-                style={{ color: 'rgba(255,255,255,0.8)', fontFamily: "'Lato', sans-serif" }}
+                style={{ color: `${lt}cc`, fontFamily: "'Lato', sans-serif" }}
               >
                 {link.label}
               </Link>
@@ -104,7 +105,7 @@ export default function Navbar() {
         {/* Mobile toggle */}
         <button
           className="lg:hidden text-2xl"
-          style={{ color: 'white' }}
+          style={{ color: lt }}
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -127,7 +128,7 @@ export default function Navbar() {
                   duration={600}
                   offset={-80}
                   className="cursor-pointer text-sm tracking-widest uppercase"
-                  style={{ color: 'rgba(255,255,255,0.8)', fontFamily: "'Lato', sans-serif" }}
+                  style={{ color: `${lt}cc`, fontFamily: "'Lato', sans-serif" }}
                   onClick={() => setOpen(false)}
                 >
                   {link.label}

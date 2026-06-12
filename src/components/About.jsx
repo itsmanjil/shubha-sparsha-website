@@ -3,6 +3,8 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 export default function About() {
   const { config } = useSiteConfig()
   const { colors, about, stats, contactInfo } = config
+  const dt = colors.darkText || '#5c4604'
+  const lt = colors.lightText || '#f7ecd0'
 
   return (
     <section id="about" className="py-16 md:py-28" style={{ background: colors.cream }}>
@@ -64,13 +66,13 @@ export default function About() {
           <div>
             <p
               className="text-lg leading-relaxed mb-6"
-              style={{ color: '#5c4604', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+              style={{ color: dt, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
             >
               {about.paragraph1}
             </p>
             <p
               className="text-lg leading-relaxed mb-8"
-              style={{ color: '#5c4604', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+              style={{ color: dt, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
             >
               {about.paragraph2}
             </p>
@@ -109,7 +111,7 @@ export default function About() {
               </p>
               <p
                 className="text-xs tracking-[0.3em] uppercase"
-                style={{ color: 'rgba(247,236,208,0.7)', fontFamily: "'Lato', sans-serif" }}
+                style={{ color: `${lt}b3`, fontFamily: "'Lato', sans-serif" }}
               >
                 {s.label}
               </p>

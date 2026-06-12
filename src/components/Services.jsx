@@ -3,6 +3,7 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 export default function Services() {
   const { config } = useSiteConfig()
   const { colors, services, servicesSection } = config
+  const dt = colors.darkText || '#5c4604'
 
   return (
     <section id="services" className="py-16 md:py-28" style={{ background: colors.cream }}>
@@ -64,7 +65,7 @@ export default function Services() {
                 </h3>
                 <p
                   className="leading-relaxed mb-6"
-                  style={{ color: '#5c4604', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+                  style={{ color: dt, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
                 >
                   {s.desc}
                 </p>

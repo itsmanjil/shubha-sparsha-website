@@ -7,6 +7,15 @@ export const defaultConfig = {
     maroon500: '#800000',
     gold: '#d4af37',
     cream: '#fffdf5',
+    lightText: '#f7ecd0',
+    darkText: '#5c4604',
+  },
+  navbar: {
+    brandName: 'Shubha Sparsha',
+    brandSubtitle: 'Event Planning',
+    ctaButton: 'Book Now',
+    logoUrl: '',
+    pageTitle: 'Shubha Sparsha — Event Planning',
   },
   hero: {
     tagline: 'Est. Since Love',
@@ -14,13 +23,18 @@ export const defaultConfig = {
     titleAccent: 'Memories',
     titleItalic: 'That Last Forever',
     subtitle: 'From intimate gatherings to grand celebrations — we orchestrate every detail with elegance, passion, and an auspicious touch.',
+    servicesButton: 'Our Services',
+    instagramButton: 'Instagram',
+    sliderInterval: 5,
   },
+  heroSlides: [],
   about: {
     subheading: 'Our Story',
     heading: 'Where Tradition Meets Elegance',
     paragraph1: 'Shubha Sparsha — meaning "auspicious touch" — was founded on the belief that every celebration deserves to be extraordinary. We are passionate event planners dedicated to turning your vision into reality.',
     paragraph2: 'From the grandeur of wedding mandaps to the joy of birthday soirées, we bring meticulous attention to detail, creative flair, and genuine care to every event we craft. Our team works closely with you to understand your culture, traditions, and personal style.',
     imageUrl: '',
+    followLinkText: 'Follow Our Journey',
   },
   stats: [
     { value: '200+', label: 'Events Planned' },
@@ -28,6 +42,12 @@ export const defaultConfig = {
     { value: '500+', label: 'Happy Families' },
     { value: '100%', label: 'Client Satisfaction' },
   ],
+  servicesSection: {
+    label: 'What We Do',
+    title: 'Our',
+    titleAccent: 'Services',
+    desc: 'Comprehensive event planning services tailored to your vision and traditions.',
+  },
   services: [
     { emoji: '💍', title: 'Wedding Planning', subtitle: 'Complete Wedding Management', desc: 'From engagement to reception — we handle every detail so you can be fully present in every precious moment.', tags: ['Venue Selection', 'Decor & Florals', 'Catering', 'Photography'] },
     { emoji: '🎂', title: 'Birthday Celebrations', subtitle: 'Milestone Birthday Parties', desc: 'Elegant, themed birthday events that reflect your personality — from intimate dinners to lavish soirées.', tags: ['Theme Design', 'Entertainment', 'Custom Cakes', 'Guest Management'] },
@@ -36,6 +56,12 @@ export const defaultConfig = {
     { emoji: '🌸', title: 'Engagement Ceremonies', subtitle: 'Roka, Sagai & Ring Ceremonies', desc: 'Set the perfect tone for your love story with a beautifully orchestrated engagement celebration.', tags: ['Ring Exchange Setup', 'Family Coordination', 'Decor', 'Mehendi'] },
     { emoji: '✨', title: 'Social Gatherings', subtitle: 'House Warmings & Anniversaries', desc: 'Every occasion is worth celebrating beautifully — griha pravesh, anniversaries, baby showers, and more.', tags: ['Custom Themes', 'Invitations', 'Decor', 'Catering'] },
   ],
+  gallerySection: {
+    label: 'Our Work',
+    title: 'Event',
+    titleAccent: 'Portfolio',
+    instagramButton: 'View Full Portfolio on Instagram',
+  },
   contactInfo: {
     phone: '9852052172',
     email: 'shubhasparshanp@gmail.com',
@@ -43,8 +69,19 @@ export const defaultConfig = {
     instagramHandle: '@shubhasparshanp',
     instagramUrl: 'https://www.instagram.com/shubhasparshanp/',
   },
+  contactSection: {
+    label: "Let's Plan Together",
+    title: 'Begin Your',
+    titleAccent: 'Celebration',
+    sidebarHeading: 'Get In Touch',
+    sidebarSubtitle: "Share your vision and we'll craft something truly unforgettable together.",
+    submitButton: 'Send Enquiry',
+  },
   footer: {
+    brandName: 'Shubha Sparsha',
+    brandSubtitle: 'Event Planning',
     tagline: 'Crafting unforgettable celebrations with elegance, tradition, and an auspicious touch.',
+    copyright: 'Shubha Sparsha. All rights reserved.',
     bottomText: 'Crafted with love in Nepal',
   },
 }
@@ -64,6 +101,12 @@ export function SiteConfigProvider({ children }) {
       setConfig(merged)
     })
   }, [])
+
+  useEffect(() => {
+    if (config.navbar.pageTitle) document.title = config.navbar.pageTitle
+    const icon = document.querySelector('link[rel="icon"]')
+    if (icon && config.navbar.logoUrl) icon.href = config.navbar.logoUrl
+  }, [config.navbar.pageTitle, config.navbar.logoUrl])
 
   async function saveConfig(key, value) {
     await supabase

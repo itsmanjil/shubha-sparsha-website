@@ -409,6 +409,8 @@ export default function AdminDashboard() {
                 <ColorPicker label="Medium Maroon (accents)" value={colors.maroon500} onChange={v => setColors(p => ({ ...p, maroon500: v }))} />
                 <ColorPicker label="Gold (primary accent)" value={colors.gold} onChange={v => setColors(p => ({ ...p, gold: v }))} />
                 <ColorPicker label="Cream (section backgrounds)" value={colors.cream} onChange={v => setColors(p => ({ ...p, cream: v }))} />
+                <ColorPicker label="Light text (on dark backgrounds)" value={colors.lightText || '#f7ecd0'} onChange={v => setColors(p => ({ ...p, lightText: v }))} />
+                <ColorPicker label="Dark text (body text on light backgrounds)" value={colors.darkText || '#5c4604'} onChange={v => setColors(p => ({ ...p, darkText: v }))} />
               </div>
             </Section>
           )}
