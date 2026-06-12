@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-scroll'
 import { useNavigate } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi'
+import { useSiteConfig } from '../contexts/SiteConfigContext'
 
 const navLinks = [
   { label: 'Home', to: 'hero' },
@@ -13,6 +14,8 @@ const navLinks = [
 
 export default function Navbar() {
   const navigate = useNavigate()
+  const { config } = useSiteConfig()
+  const { colors } = config
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -24,16 +27,14 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? 'bg-maroon-700/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
-      }`}
-      style={{ background: scrolled ? 'rgba(85,0,0,0.95)' : 'transparent' }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500`}
+      style={{ background: scrolled ? 'rgba(85,0,0,0.95)' : 'transparent', backdropFilter: scrolled ? 'blur(8px)' : 'none' }}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="text-left">
           <span
             className="font-serif text-lg md:text-xl font-semibold tracking-widest"
-            style={{ color: '#d4af37', fontFamily: "'Playfair Display', serif" }}
+            style={{ color: colors.gold, fontFamily: "'Playfair Display', serif" }}
           >
             Shubha Sparsha
           </span>
@@ -72,8 +73,8 @@ export default function Navbar() {
             offset={-80}
             className="cursor-pointer px-6 py-2 text-xs tracking-[0.2em] uppercase font-semibold transition-all"
             style={{
-              background: 'linear-gradient(135deg, #d4af37, #b8960c)',
-              color: '#2a0000',
+              background: `linear-gradient(135deg, ${colors.gold}, #b8960c)`,
+              color: colors.maroon,
               fontFamily: "'Lato', sans-serif",
             }}
           >
@@ -96,7 +97,7 @@ export default function Navbar() {
       {open && (
         <div
           className="lg:hidden px-4 md:px-6 pb-8 pt-4"
-          style={{ background: '#550000', borderTop: '1px solid rgba(212,175,55,0.2)' }}
+          style={{ background: '#550000', borderTop: `1px solid ${colors.gold}33` }}
         >
           <ul className="flex flex-col gap-5">
             {navLinks.map((link) => (

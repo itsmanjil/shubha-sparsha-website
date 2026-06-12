@@ -1,12 +1,17 @@
 import { useState } from 'react'
+import emailjs from '@emailjs/browser'
 import { FiInstagram, FiMail, FiPhone, FiSend, FiMapPin } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
+import { useSiteConfig } from '../contexts/SiteConfigContext'
 
 const eventTypes = [
   'Wedding', 'Birthday', 'Corporate Event', 'Religious Ceremony', 'Engagement', 'Other'
 ]
 
 export default function Contact() {
+  const { config } = useSiteConfig()
+  const { colors, contactInfo } = config
+
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', message: '' })
   const [status, setStatus] = useState('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -14,21 +19,8 @@ export default function Contact() {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setStatus('loading')
-    setErrorMsg('')
-
-    // 1. Save to Supabase database
-    const { error: dbError } = await supabase.from('contacts').insert([form])
-    if (dbError) {
-      setErrorMsg(dbError.message)
-      setStatus('error')
-      return
-    }
-
-    // 2. Send email notification via Web3Forms
-    const emailRes = await fetch('https://api.web3forms.com/submit', {
+  const sendAdminEmail = () =>
+    fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -42,38 +34,69 @@ export default function Contact() {
         message: form.message,
       }),
     })
+      .then((r) => r.json())
+      .then((d) => { if (!d.success) console.warn('Admin email failed:', d.message) })
+      .catch((err) => console.warn('Admin email error:', err))
 
-    const emailData = await emailRes.json()
-    if (!emailData.success) {
-      // DB saved successfully — don't block the user, just log the email failure
-      console.warn('Email notification failed:', emailData.message)
+  const sendConfirmationEmail = () =>
+    emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      {
+        to_name: form.name,
+        to_email: form.email,
+        event_type: form.event_type || 'your event',
+        message: form.message,
+        phone: form.phone || 'Not provided',
+      },
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+    ).catch((err) => console.warn('Confirmation email error:', err))
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setStatus('loading')
+    setErrorMsg('')
+
+    const { error: dbError } = await supabase.from('contacts').insert([form])
+    if (dbError) {
+      setErrorMsg(dbError.message)
+      setStatus('error')
+      return
     }
 
     setStatus('success')
+    Promise.allSettled([sendAdminEmail(), sendConfirmationEmail()])
   }
 
+  const contactItems = [
+    { icon: <FiInstagram />, label: 'Instagram', value: contactInfo.instagramHandle, href: contactInfo.instagramUrl },
+    { icon: <FiMail />, label: 'Email', value: contactInfo.email, href: `mailto:${contactInfo.email}` },
+    { icon: <FiPhone />, label: 'Phone', value: `+977 ${contactInfo.phone}`, href: `tel:+977${contactInfo.phone}` },
+    { icon: <FiMapPin />, label: 'Location', value: contactInfo.address, href: '#' },
+  ]
+
   return (
-    <section id="contact" className="py-16 md:py-28" style={{ background: '#fffdf5' }}>
+    <section id="contact" className="py-16 md:py-28" style={{ background: colors.cream }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
-            style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
+            style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
           >
             Let's Plan Together
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
-            style={{ fontFamily: "'Playfair Display', serif", color: '#2a0000' }}
+            style={{ fontFamily: "'Playfair Display', serif", color: colors.maroon }}
           >
             Begin Your{' '}
-            <em style={{ color: '#800000' }}>Celebration</em>
+            <em style={{ color: colors.maroon500 }}>Celebration</em>
           </h2>
           <div className="flex items-center justify-center gap-4">
-            <div className="h-px w-16" style={{ background: '#d4af37' }} />
-            <span style={{ color: '#d4af37' }}>✦</span>
-            <div className="h-px w-16" style={{ background: '#d4af37' }} />
+            <div className="h-px w-16" style={{ background: colors.gold }} />
+            <span style={{ color: colors.gold }}>✦</span>
+            <div className="h-px w-16" style={{ background: colors.gold }} />
           </div>
         </div>
 
@@ -81,7 +104,7 @@ export default function Contact() {
           {/* Info panel */}
           <div
             className="lg:col-span-2 p-6 md:p-10 flex flex-col justify-between"
-            style={{ background: '#2a0000' }}
+            style={{ background: colors.maroon }}
           >
             <div>
               <h3
@@ -98,23 +121,18 @@ export default function Contact() {
               </p>
 
               <div className="space-y-6">
-                {[
-                  { icon: <FiInstagram />, label: 'Instagram', value: '@shubhasparshanp', href: 'https://www.instagram.com/shubhasparshanp/' },
-                  { icon: <FiMail />, label: 'Email', value: 'shubhasparshanp@gmail.com', href: 'mailto:shubhasparshanp@gmail.com' },
-                  { icon: <FiPhone />, label: 'Phone', value: '+977 9852052172', href: 'tel:+9779852052172' },
-                  { icon: <FiMapPin />, label: 'Location', value: 'Nepal', href: '#' },
-                ].map((item) => (
+                {contactItems.map((item) => (
                   <div key={item.label} className="flex gap-4 items-start">
                     <div
                       className="w-10 h-10 flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(212,175,55,0.15)', color: '#d4af37' }}
+                      style={{ background: `${colors.gold}26`, color: colors.gold }}
                     >
                       {item.icon}
                     </div>
                     <div>
                       <p
                         className="text-xs tracking-[0.2em] uppercase mb-0.5"
-                        style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
+                        style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
                       >
                         {item.label}
                       </p>
@@ -138,17 +156,17 @@ export default function Contact() {
             {status === 'success' ? (
               <div
                 className="h-full flex flex-col items-center justify-center text-center p-8 md:p-16 border"
-                style={{ borderColor: '#d4af37' }}
+                style={{ borderColor: colors.gold }}
               >
                 <div className="text-5xl mb-6">✨</div>
                 <h3
                   className="text-2xl font-bold mb-4"
-                  style={{ fontFamily: "'Playfair Display', serif", color: '#2a0000' }}
+                  style={{ fontFamily: "'Playfair Display', serif", color: colors.maroon }}
                 >
                   Thank You!
                 </h3>
                 <p style={{ color: '#5c4604', fontFamily: "'Lato', sans-serif", fontWeight: 300 }}>
-                  We've received your enquiry and will reach out within 24 hours to begin planning your celebration.
+                  We've received your enquiry. A confirmation has been sent to your email — we'll reach out within 24 hours to begin planning your celebration.
                 </p>
               </div>
             ) : (
@@ -169,7 +187,7 @@ export default function Contact() {
                       onChange={handleChange}
                       placeholder="Your name"
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                   <div>
@@ -187,7 +205,7 @@ export default function Contact() {
                       onChange={handleChange}
                       placeholder="your@email.com"
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                 </div>
@@ -207,7 +225,7 @@ export default function Contact() {
                       onChange={handleChange}
                       placeholder="+977 XXXXXXXXXX"
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                     />
                   </div>
                   <div>
@@ -222,7 +240,7 @@ export default function Contact() {
                       value={form.event_type}
                       onChange={handleChange}
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: form.event_type ? '#2a0000' : '#9ca3af', fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: form.event_type ? colors.maroon : '#9ca3af', fontFamily: "'Lato', sans-serif" }}
                     >
                       <option value="">Select event type</option>
                       {eventTypes.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -245,7 +263,7 @@ export default function Contact() {
                     onChange={handleChange}
                     placeholder="Share your vision, preferred dates, approximate guest count…"
                     className="w-full px-4 py-3 bg-transparent focus:outline-none resize-none"
-                    style={{ borderBottom: '2px solid rgba(212,175,55,0.4)', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}
+                    style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                   />
                 </div>
 
@@ -257,7 +275,7 @@ export default function Contact() {
                   type="submit"
                   disabled={status === 'loading'}
                   className="flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5 disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #800000, #550000)', color: '#f7ecd0', fontFamily: "'Lato', sans-serif" }}
+                  style={{ background: `linear-gradient(135deg, ${colors.maroon500}, #550000)`, color: '#f7ecd0', fontFamily: "'Lato', sans-serif" }}
                 >
                   <FiSend />
                   {status === 'loading' ? 'Sending…' : 'Send Enquiry'}
