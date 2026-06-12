@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-const navLinks = [
+const NAV_LINKS = [
   { label: 'Home', to: 'hero' },
   { label: 'About', to: 'about' },
   { label: 'Services', to: 'services' },
@@ -15,7 +15,7 @@ const navLinks = [
 export default function Navbar() {
   const navigate = useNavigate()
   const { config } = useSiteConfig()
-  const { colors } = config
+  const { colors, navbar } = config
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -28,27 +28,46 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500`}
-      style={{ background: scrolled ? 'rgba(85,0,0,0.95)' : 'transparent', backdropFilter: scrolled ? 'blur(8px)' : 'none' }}
+      style={{ background: scrolled ? `${colors.maroon500}f2` : 'transparent', backdropFilter: scrolled ? 'blur(8px)' : 'none' }}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-        <button onClick={() => navigate('/')} className="text-left">
-          <span
-            className="font-serif text-lg md:text-xl font-semibold tracking-widest"
-            style={{ color: colors.gold, fontFamily: "'Playfair Display', serif" }}
-          >
-            Shubha Sparsha
-          </span>
-          <span
-            className="block text-xs tracking-[0.3em] uppercase"
-            style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Lato', sans-serif" }}
-          >
-            Event Planning
-          </span>
+        <button onClick={() => navigate('/')} className="text-left flex items-center gap-3">
+          {navbar.logoUrl ? (
+            <img
+              src={navbar.logoUrl}
+              alt={navbar.brandName}
+              style={{ height: '40px', width: '40px', objectFit: 'contain', borderRadius: '4px', flexShrink: 0 }}
+            />
+          ) : (
+            <div style={{
+              width: '36px', height: '36px', borderRadius: '4px', flexShrink: 0,
+              background: `linear-gradient(135deg, ${colors.gold}, #b8960c)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: colors.maroon, fontFamily: "'Playfair Display', serif",
+              fontSize: '1.1rem', fontWeight: 700,
+            }}>
+              {navbar.brandName.charAt(0)}
+            </div>
+          )}
+          <div>
+            <span
+              className="font-serif text-lg md:text-xl font-semibold tracking-widest block"
+              style={{ color: colors.gold, fontFamily: "'Playfair Display', serif" }}
+            >
+              {navbar.brandName}
+            </span>
+            <span
+              className="block text-xs tracking-[0.3em] uppercase"
+              style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Lato', sans-serif" }}
+            >
+              {navbar.brandSubtitle}
+            </span>
+          </div>
         </button>
 
         {/* Desktop links */}
         <ul className="hidden lg:flex gap-8 items-center">
-          {navLinks.map((link) => (
+          {NAV_LINKS.map((link) => (
             <li key={link.to}>
               <Link
                 to={link.to}
@@ -78,7 +97,7 @@ export default function Navbar() {
               fontFamily: "'Lato', sans-serif",
             }}
           >
-            Book Now
+            {navbar.ctaButton}
           </Link>
         </div>
 
@@ -97,10 +116,10 @@ export default function Navbar() {
       {open && (
         <div
           className="lg:hidden px-4 md:px-6 pb-8 pt-4"
-          style={{ background: '#550000', borderTop: `1px solid ${colors.gold}33` }}
+          style={{ background: `${colors.maroon500}f5`, borderTop: `1px solid ${colors.gold}33` }}
         >
           <ul className="flex flex-col gap-5">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <li key={link.to}>
                 <Link
                   to={link.to}
