@@ -13,6 +13,7 @@ const ADMIN_CSS = `
     width: 190px; background: white; border-right: 1px solid #e5e7eb;
     flex-shrink: 0; padding-top: 1rem;
   }
+  .admin-tab-dropdown { display: none; }
   .admin-main { flex: 1; padding: 2rem; overflow-y: auto; min-width: 0; }
   .admin-section { background: white; padding: 2rem; max-width: 820px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
   .admin-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -20,20 +21,17 @@ const ADMIN_CSS = `
   .admin-grid-service { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 1rem; }
   @media (max-width: 767px) {
     .admin-layout { flex-direction: column; }
-    .admin-sidebar {
-      width: 100% !important; padding-top: 0 !important;
-      border-right: none !important; border-bottom: 1px solid #e5e7eb;
-      display: flex !important; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    }
-    .admin-sidebar button {
-      width: auto !important; flex-shrink: 0 !important; text-align: center !important;
-      padding: 0.75rem 1rem !important; white-space: nowrap !important;
-      border-left: 3px solid transparent !important;
-      border-bottom: 3px solid transparent !important;
-    }
-    .admin-sidebar button.active-tab {
-      border-left: 3px solid transparent !important;
-      border-bottom: 3px solid #d4af37 !important;
+    .admin-sidebar { display: none !important; }
+    .admin-tab-dropdown { display: block; background: white; border-bottom: 1px solid #e5e7eb; padding: 0.75rem 1rem; }
+    .admin-tab-dropdown select {
+      width: 100%; padding: 0.6rem 0.75rem;
+      border: 1px solid #e5e7eb; background: white;
+      font-family: 'Lato', sans-serif; font-size: 0.85rem;
+      color: #2a0000; font-weight: 600; outline: none;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23d4af37' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.75rem center;
+      padding-right: 2rem;
     }
     .admin-main { padding: 1rem !important; }
     .admin-section { padding: 1.25rem !important; }
@@ -347,6 +345,13 @@ export default function AdminDashboard() {
           Sign Out
         </button>
       </header>
+
+      {/* Mobile dropdown */}
+      <div className="admin-tab-dropdown">
+        <select value={activeTab} onChange={e => setActiveTab(e.target.value)}>
+          {TABS.map(tab => <option key={tab} value={tab}>{tab}</option>)}
+        </select>
+      </div>
 
       <div className="admin-layout">
         {/* Sidebar */}
