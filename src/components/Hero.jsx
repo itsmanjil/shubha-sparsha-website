@@ -32,7 +32,7 @@ export default function Hero() {
     <section
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ background: `linear-gradient(135deg, ${colors.maroon} 0%, #550000 40%, #6b0000 70%, #3d2000 100%)` }}
+      style={{ background: `linear-gradient(135deg, ${colors.maroon} 0%, ${colors.maroon500} 40%, ${colors.maroon500} 70%, ${colors.maroon} 100%)` }}
     >
       {/* Slider background images */}
       {slides.map((url, i) => (

@@ -15,7 +15,7 @@ export default function Footer() {
   const { colors, footer, contactInfo } = config
 
   return (
-    <footer style={{ background: '#1a0000' }}>
+    <footer style={{ background: colors.maroon }}>
       {/* Top gold line */}
       <div className="h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${colors.gold}, transparent)` }} />
 

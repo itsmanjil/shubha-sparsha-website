@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { FiInstagram, FiExternalLink, FiImage } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
+import { useSiteConfig } from '../contexts/SiteConfigContext'
 
 const categories = ['All', 'Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 export default function Gallery() {
+  const { config } = useSiteConfig()
+  const { colors, contactInfo, gallerySection } = config
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')
 
@@ -31,26 +34,26 @@ export default function Gallery() {
   const placeholderCount = Math.max(0, 6 - filtered.length)
 
   return (
-    <section id="gallery" className="py-16 md:py-28" style={{ background: '#2a0000' }}>
+    <section id="gallery" className="py-16 md:py-28" style={{ background: colors.maroon }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-10 md:mb-16">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
-            style={{ color: '#d4af37', fontFamily: "'Lato', sans-serif" }}
+            style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
           >
-            Our Work
+            {gallerySection.label}
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
-            style={{ fontFamily: "'Playfair Display', serif", color: '#f7ecd0' }}
+            style={{ fontFamily: "'Playfair Display', serif", color: colors.cream }}
           >
-            Event <em style={{ color: '#d4af37' }}>Portfolio</em>
+            {gallerySection.title} <em style={{ color: colors.gold }}>{gallerySection.titleAccent}</em>
           </h2>
           <div className="flex items-center justify-center gap-4 mb-10">
-            <div className="h-px w-16" style={{ background: '#d4af37' }} />
-            <span style={{ color: '#d4af37' }}>✦</span>
-            <div className="h-px w-16" style={{ background: '#d4af37' }} />
+            <div className="h-px w-16" style={{ background: colors.gold }} />
+            <span style={{ color: colors.gold }}>✦</span>
+            <div className="h-px w-16" style={{ background: colors.gold }} />
           </div>
 
           {/* Category filter */}
@@ -62,9 +65,9 @@ export default function Gallery() {
                 className="px-5 py-2 text-xs tracking-[0.2em] uppercase transition-all duration-300"
                 style={{
                   fontFamily: "'Lato', sans-serif",
-                  background: filter === cat ? '#d4af37' : 'transparent',
-                  color: filter === cat ? '#2a0000' : '#d4af37',
-                  border: '1px solid #d4af37',
+                  background: filter === cat ? colors.gold : 'transparent',
+                  color: filter === cat ? colors.maroon : colors.gold,
+                  border: `1px solid ${colors.gold}`,
                   fontWeight: filter === cat ? 700 : 400,
                 }}
               >
@@ -79,7 +82,7 @@ export default function Gallery() {
           {filtered.map((img) => (
             <a
               key={img.id}
-              href="https://www.instagram.com/shubhasparshanp/"
+              href={contactInfo.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative aspect-square overflow-hidden"
@@ -91,9 +94,9 @@ export default function Gallery() {
               />
               <div
                 className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: 'rgba(42,0,0,0.7)' }}
+                style={{ background: `${colors.maroon}b3` }}
               >
-                <FiExternalLink className="text-3xl" style={{ color: '#d4af37' }} />
+                <FiExternalLink className="text-3xl" style={{ color: colors.gold }} />
               </div>
             </a>
           ))}
@@ -102,9 +105,9 @@ export default function Gallery() {
             <div
               key={`ph-${i}`}
               className="aspect-square flex items-center justify-center"
-              style={{ background: i % 2 === 0 ? '#3d0000' : '#400000' }}
+              style={{ background: `${colors.maroon500}66` }}
             >
-              <FiImage className="text-4xl opacity-20" style={{ color: '#d4af37' }} />
+              <FiImage className="text-4xl opacity-20" style={{ color: colors.gold }} />
             </div>
           ))}
         </div>
@@ -112,18 +115,18 @@ export default function Gallery() {
         {/* CTA */}
         <div className="text-center">
           <a
-            href="https://www.instagram.com/shubhasparshanp/"
+            href={contactInfo.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border transition-all duration-300 hover:gap-5"
             style={{
-              borderColor: '#d4af37',
-              color: '#d4af37',
+              borderColor: colors.gold,
+              color: colors.gold,
               fontFamily: "'Lato', sans-serif",
             }}
           >
             <FiInstagram />
-            View Full Portfolio on Instagram
+            {gallerySection.instagramButton}
           </a>
         </div>
       </div>

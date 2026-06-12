@@ -5,7 +5,7 @@ export default function Services() {
   const { colors, services, servicesSection } = config
 
   return (
-    <section id="services" className="py-16 md:py-28" style={{ background: '#fdf8ee' }}>
+    <section id="services" className="py-16 md:py-28" style={{ background: colors.cream }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Section header */}
         <div className="text-center mb-12 md:mb-20">
