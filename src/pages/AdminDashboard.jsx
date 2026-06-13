@@ -40,6 +40,7 @@ const ADMIN_CSS = `
     .admin-grid-service { grid-template-columns: 1fr !important; }
     .admin-header-subtitle { display: none !important; }
     .admin-dash-stats { grid-template-columns: 1fr 1fr !important; }
+    .admin-quick-actions { grid-template-columns: 1fr !important; }
   }
 `
 
@@ -494,14 +495,14 @@ export default function AdminDashboard() {
                   {/* Stat cards */}
                   <div className="admin-dash-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', marginBottom: '1.25rem' }}>
                     {[
-                      { label: 'Total inquiries', value: dashStats.total, sub: 'all time', icon: '✉' },
-                      { label: 'New this week', value: dashStats.newThisWeek, sub: 'last 7 days', icon: '🔔', highlight: dashStats.newThisWeek > 0 },
-                      { label: 'Gallery images', value: dashStats.galleryCount, sub: 'uploaded', icon: '🖼' },
-                      { label: 'Top event', value: Object.entries(dashStats.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] || '—', sub: `${Object.entries(dashStats.breakdown).sort((a, b) => b[1] - a[1])[0]?.[1] || 0} inquiries`, icon: '✦', small: true },
-                    ].map(({ label, value, sub, icon, highlight, small }) => (
+                      { label: 'Total inquiries', value: dashStats.total, sub: 'all time' },
+                      { label: 'New this week', value: dashStats.newThisWeek, sub: 'last 7 days', highlight: dashStats.newThisWeek > 0 },
+                      { label: 'Gallery images', value: dashStats.galleryCount, sub: 'uploaded' },
+                      { label: 'Top event', value: Object.entries(dashStats.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] || '—', sub: `${Object.entries(dashStats.breakdown).sort((a, b) => b[1] - a[1])[0]?.[1] || 0} inquiries`, small: true },
+                    ].map(({ label, value, sub, highlight, small }) => (
                       <div key={label} style={{ background: 'white', border: `1px solid ${highlight ? '#d4af3766' : '#e5e7eb'}`, padding: '1.1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                        <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9ca3af', fontFamily: "'Lato', sans-serif", marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>{icon}</span>{label}
+                        <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9ca3af', fontFamily: "'Lato', sans-serif", marginBottom: '0.5rem' }}>
+                          {label}
                         </p>
                         <p style={{ fontSize: small ? '1.1rem' : '1.75rem', fontWeight: 700, color: highlight ? '#2a0000' : '#1f2937', fontFamily: small ? "'Playfair Display', serif" : "'Lato', sans-serif", margin: 0, lineHeight: 1.1 }}>{value}</p>
                         <p style={{ fontSize: '0.72rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif", marginTop: '0.3rem' }}>{sub}</p>
@@ -540,21 +541,21 @@ export default function AdminDashboard() {
                     {/* Quick actions */}
                     <div style={{ background: 'white', border: '1px solid #e5e7eb', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                       <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b7280', fontFamily: "'Lato', sans-serif", fontWeight: 700, margin: '0 0 1rem' }}>Quick actions</p>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div className="admin-quick-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                         {[
-                          { label: 'Add photo', icon: '🖼', tab: 'Gallery' },
-                          { label: 'Edit colors', icon: '🎨', tab: 'Colors' },
-                          { label: 'View inquiries', icon: '✉', tab: 'Inquiries' },
-                          { label: 'Edit navbar', icon: '☰', tab: 'Navbar' },
-                          { label: 'Edit footer', icon: '⬇', tab: 'Footer' },
-                          { label: 'Edit hero', icon: '✦', tab: 'Hero' },
-                        ].map(({ label, icon, tab }) => (
+                          { label: 'Add photo', tab: 'Gallery' },
+                          { label: 'Edit colors', tab: 'Colors' },
+                          { label: 'View inquiries', tab: 'Inquiries' },
+                          { label: 'Edit navbar', tab: 'Navbar' },
+                          { label: 'Edit footer', tab: 'Footer' },
+                          { label: 'Edit hero', tab: 'Hero' },
+                        ].map(({ label, tab }) => (
                           <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            style={{ background: '#f9fafb', border: '1px solid #e5e7eb', padding: '0.7rem 0.75rem', cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#374151', fontFamily: "'Lato', sans-serif", display: 'flex', alignItems: 'center', gap: '8px' }}
+                            style={{ background: '#f9fafb', border: '1px solid #e5e7eb', padding: '0.7rem 0.75rem', cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#374151', fontFamily: "'Lato', sans-serif" }}
                           >
-                            <span>{icon}</span>{label}
+                            {label}
                           </button>
                         ))}
                       </div>
