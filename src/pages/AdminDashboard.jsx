@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-const TABS = ['Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Gallery Section', 'Contact', 'Footer', 'Gallery']
+const TABS = ['Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 const GALLERY_CATEGORIES = ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 const ADMIN_CSS = `
@@ -163,6 +163,10 @@ export default function AdminDashboard() {
   const [newPhoto, setNewPhoto] = useState({ title: '', category: 'Weddings', file: null, preview: null })
   const [dragOver, setDragOver] = useState(false)
 
+  const [inquiries, setInquiries] = useState([])
+  const [inquiriesLoading, setInquiriesLoading] = useState(false)
+  const [expandedInquiry, setExpandedInquiry] = useState(null)
+
   const [colors, setColors] = useState({ ...config.colors })
   const [navbar, setNavbar] = useState({ ...config.navbar })
   const [hero, setHero] = useState({ ...config.hero })
@@ -270,9 +274,32 @@ export default function AdminDashboard() {
     }
   }
 
+  // Auto sign-out after 30 min of inactivity
+  useEffect(() => {
+    let timer = setTimeout(handleSignOut, 30 * 60 * 1000)
+    const reset = () => { clearTimeout(timer); timer = setTimeout(handleSignOut, 30 * 60 * 1000) }
+    window.addEventListener('mousemove', reset)
+    window.addEventListener('keydown', reset)
+    return () => { clearTimeout(timer); window.removeEventListener('mousemove', reset); window.removeEventListener('keydown', reset) }
+  }, [])
+
   useEffect(() => {
     if (activeTab === 'Gallery') fetchGallery()
+    if (activeTab === 'Inquiries') fetchInquiries()
   }, [activeTab])
+
+  async function fetchInquiries() {
+    setInquiriesLoading(true)
+    const { data } = await supabase.from('contacts').select('*').order('created_at', { ascending: false })
+    if (data) setInquiries(data)
+    setInquiriesLoading(false)
+  }
+
+  async function deleteInquiry(id) {
+    if (!confirm('Delete this inquiry?')) return
+    await supabase.from('contacts').delete().eq('id', id)
+    setInquiries(prev => prev.filter(i => i.id !== id))
+  }
 
   async function fetchGallery() {
     setGalleryLoading(true)
@@ -969,6 +996,92 @@ export default function AdminDashboard() {
                         >
                           ✕
                         </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {/* INQUIRIES */}
+          {activeTab === 'Inquiries' && (
+            <div style={{ maxWidth: '820px' }}>
+              <div className="admin-section">
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2a0000', marginTop: 0, marginBottom: '1.75rem', paddingBottom: '1rem', borderBottom: '2px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span>Inquiries ({inquiries.length})</span>
+                  <button onClick={fetchInquiries} style={{ fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '0.4rem 1rem', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer', color: '#6b7280', fontFamily: "'Lato', sans-serif" }}>
+                    Refresh
+                  </button>
+                </h2>
+
+                {inquiriesLoading ? (
+                  <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Loading…</p>
+                ) : inquiries.length === 0 ? (
+                  <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>No inquiries yet.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {inquiries.map(inq => (
+                      <div key={inq.id} style={{ border: '1px solid #e5e7eb', borderRadius: '2px', overflow: 'hidden' }}>
+                        {/* Header row */}
+                        <div
+                          onClick={() => setExpandedInquiry(expandedInquiry === inq.id ? null : inq.id)}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', background: expandedInquiry === inq.id ? '#fffdf5' : 'white', cursor: 'pointer', gap: '0.75rem', flexWrap: 'wrap' }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #2a0000, #550000)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d4af37', fontFamily: "'Playfair Display', serif", fontSize: '1rem', fontWeight: 700, flexShrink: 0 }}>
+                              {inq.name?.charAt(0)?.toUpperCase() || '?'}
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                              <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#1f2937', fontFamily: "'Lato', sans-serif", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inq.name}</p>
+                              <p style={{ margin: 0, fontSize: '0.75rem', color: '#6b7280', fontFamily: "'Lato', sans-serif", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inq.email}</p>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                            {inq.event_type && (
+                              <span style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '0.2rem 0.6rem', background: '#d4af3722', color: '#7a5f06', fontFamily: "'Lato', sans-serif", fontWeight: 700 }}>
+                                {inq.event_type}
+                              </span>
+                            )}
+                            <span style={{ fontSize: '0.7rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif" }}>
+                              {new Date(inq.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                            <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>{expandedInquiry === inq.id ? '▲' : '▼'}</span>
+                          </div>
+                        </div>
+
+                        {/* Expanded details */}
+                        {expandedInquiry === inq.id && (
+                          <div style={{ padding: '1rem', borderTop: '1px solid #f3f4f6', background: '#fafafa' }}>
+                            <div className="admin-grid-2" style={{ marginBottom: '1rem' }}>
+                              <div>
+                                <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9ca3af', margin: '0 0 0.25rem', fontFamily: "'Lato', sans-serif" }}>Email</p>
+                                <a href={`mailto:${inq.email}`} style={{ fontSize: '0.85rem', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}>{inq.email}</a>
+                              </div>
+                              <div>
+                                <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9ca3af', margin: '0 0 0.25rem', fontFamily: "'Lato', sans-serif" }}>Phone</p>
+                                <a href={`tel:${inq.phone}`} style={{ fontSize: '0.85rem', color: '#2a0000', fontFamily: "'Lato', sans-serif" }}>{inq.phone || '—'}</a>
+                              </div>
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                              <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9ca3af', margin: '0 0 0.25rem', fontFamily: "'Lato', sans-serif" }}>Message</p>
+                              <p style={{ fontSize: '0.85rem', color: '#374151', fontFamily: "'Lato', sans-serif", lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>{inq.message}</p>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <a
+                                href={`mailto:${inq.email}?subject=Re: Your enquiry — Shubha Sparsha`}
+                                style={{ padding: '0.4rem 1rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, fontFamily: "'Lato', sans-serif", textDecoration: 'none' }}
+                              >
+                                Reply via Email
+                              </a>
+                              <button
+                                onClick={() => deleteInquiry(inq.id)}
+                                style={{ padding: '0.4rem 1rem', background: 'transparent', color: '#ef4444', border: '1px solid #fca5a5', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
