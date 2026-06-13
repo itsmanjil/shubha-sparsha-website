@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-const TABS = ['Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
+const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 const GALLERY_CATEGORIES = ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 const ADMIN_CSS = `
@@ -39,6 +39,7 @@ const ADMIN_CSS = `
     .admin-grid-stat { grid-template-columns: 1fr !important; }
     .admin-grid-service { grid-template-columns: 1fr !important; }
     .admin-header-subtitle { display: none !important; }
+    .admin-dash-stats { grid-template-columns: 1fr 1fr !important; }
   }
 `
 
@@ -144,7 +145,7 @@ function Section({ title, children, onSave, saving }) {
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const { config, saveConfig } = useSiteConfig()
-  const [activeTab, setActiveTab] = useState('Colors')
+  const [activeTab, setActiveTab] = useState('Dashboard')
   const [saving, setSaving] = useState(false)
   const [savedMsg, setSavedMsg] = useState('')
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -166,6 +167,9 @@ export default function AdminDashboard() {
   const [inquiries, setInquiries] = useState([])
   const [inquiriesLoading, setInquiriesLoading] = useState(false)
   const [expandedInquiry, setExpandedInquiry] = useState(null)
+
+  const [dashStats, setDashStats] = useState({ total: 0, newThisWeek: 0, galleryCount: 0, recent: [], breakdown: {}, weekly: Array(7).fill(0) })
+  const [dashLoading, setDashLoading] = useState(false)
 
   const [colors, setColors] = useState({ ...config.colors })
   const [navbar, setNavbar] = useState({ ...config.navbar })
@@ -283,7 +287,10 @@ export default function AdminDashboard() {
     return () => { clearTimeout(timer); window.removeEventListener('mousemove', reset); window.removeEventListener('keydown', reset) }
   }, [])
 
+  useEffect(() => { fetchDashboardData() }, [])
+
   useEffect(() => {
+    if (activeTab === 'Dashboard') fetchDashboardData()
     if (activeTab === 'Gallery') fetchGallery()
     if (activeTab === 'Inquiries') fetchInquiries()
   }, [activeTab])
@@ -299,6 +306,41 @@ export default function AdminDashboard() {
     if (!confirm('Delete this inquiry?')) return
     await supabase.from('contacts').delete().eq('id', id)
     setInquiries(prev => prev.filter(i => i.id !== id))
+  }
+
+  async function fetchDashboardData() {
+    setDashLoading(true)
+    try {
+      const [{ data: contacts }, { count: galleryCount }] = await Promise.all([
+        supabase.from('contacts').select('id, name, email, event_type, created_at').order('created_at', { ascending: false }),
+        supabase.from('gallery').select('id', { count: 'exact', head: true }),
+      ])
+      if (!contacts) return
+      const now = new Date()
+      const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000)
+      const newThisWeek = contacts.filter(c => new Date(c.created_at) >= weekAgo).length
+      const breakdown = {}
+      contacts.forEach(c => { const t = c.event_type || 'Other'; breakdown[t] = (breakdown[t] || 0) + 1 })
+      const weeklyBuckets = Array(7).fill(0)
+      contacts.forEach(c => {
+        const ageDays = (now - new Date(c.created_at)) / (24 * 60 * 60 * 1000)
+        const idx = Math.floor(ageDays / 7)
+        if (idx < 7) weeklyBuckets[idx]++
+      })
+      setDashStats({ total: contacts.length, newThisWeek, galleryCount: galleryCount || 0, recent: contacts.slice(0, 5), breakdown, weekly: [...weeklyBuckets].reverse() })
+    } finally {
+      setDashLoading(false)
+    }
+  }
+
+  async function exportCSV() {
+    const { data } = await supabase.from('contacts').select('*').order('created_at', { ascending: false })
+    if (!data || data.length === 0) { alert('No inquiries to export.'); return }
+    const headers = ['Name', 'Email', 'Phone', 'Event Type', 'Message', 'Date']
+    const rows = data.map(i => [i.name, i.email, i.phone || '', i.event_type || '', (i.message || '').replace(/"/g, '""'), new Date(i.created_at).toLocaleDateString('en-GB')])
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })), download: `inquiries-${new Date().toISOString().slice(0, 10)}.csv` })
+    a.click()
   }
 
   async function fetchGallery() {
@@ -423,6 +465,158 @@ export default function AdminDashboard() {
               fontSize: '0.85rem',
             }}>
               {savedMsg}
+            </div>
+          )}
+
+          {/* DASHBOARD */}
+          {activeTab === 'Dashboard' && (
+            <div>
+              {/* Greeting */}
+              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', color: '#2a0000', margin: 0 }}>Dashboard</h2>
+                  <p style={{ fontSize: '0.78rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif", marginTop: '0.2rem' }}>
+                    {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+                <button
+                  onClick={fetchDashboardData}
+                  style={{ fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '0.4rem 1rem', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer', color: '#6b7280', fontFamily: "'Lato', sans-serif" }}
+                >
+                  Refresh
+                </button>
+              </div>
+
+              {dashLoading ? (
+                <p style={{ color: '#9ca3af', fontFamily: "'Lato', sans-serif", fontSize: '0.85rem' }}>Loading…</p>
+              ) : (
+                <>
+                  {/* Stat cards */}
+                  <div className="admin-dash-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px', marginBottom: '1.25rem' }}>
+                    {[
+                      { label: 'Total inquiries', value: dashStats.total, sub: 'all time', icon: '✉' },
+                      { label: 'New this week', value: dashStats.newThisWeek, sub: 'last 7 days', icon: '🔔', highlight: dashStats.newThisWeek > 0 },
+                      { label: 'Gallery images', value: dashStats.galleryCount, sub: 'uploaded', icon: '🖼' },
+                      { label: 'Top event', value: Object.entries(dashStats.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] || '—', sub: `${Object.entries(dashStats.breakdown).sort((a, b) => b[1] - a[1])[0]?.[1] || 0} inquiries`, icon: '✦', small: true },
+                    ].map(({ label, value, sub, icon, highlight, small }) => (
+                      <div key={label} style={{ background: 'white', border: `1px solid ${highlight ? '#d4af3766' : '#e5e7eb'}`, padding: '1.1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                        <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9ca3af', fontFamily: "'Lato', sans-serif", marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>{icon}</span>{label}
+                        </p>
+                        <p style={{ fontSize: small ? '1.1rem' : '1.75rem', fontWeight: 700, color: highlight ? '#2a0000' : '#1f2937', fontFamily: small ? "'Playfair Display', serif" : "'Lato', sans-serif", margin: 0, lineHeight: 1.1 }}>{value}</p>
+                        <p style={{ fontSize: '0.72rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif", marginTop: '0.3rem' }}>{sub}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Row 2: Recent inquiries + Quick actions */}
+                  <div className="admin-grid-2" style={{ marginBottom: '1.25rem' }}>
+                    {/* Recent inquiries */}
+                    <div style={{ background: 'white', border: '1px solid #e5e7eb', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                        <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b7280', fontFamily: "'Lato', sans-serif", fontWeight: 700, margin: 0 }}>Recent inquiries</p>
+                        <button onClick={() => setActiveTab('Inquiries')} style={{ fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#d4af37', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: "'Lato', sans-serif", fontWeight: 700 }}>View all →</button>
+                      </div>
+                      {dashStats.recent.length === 0 ? (
+                        <p style={{ color: '#9ca3af', fontSize: '0.82rem', fontFamily: "'Lato', sans-serif" }}>No inquiries yet.</p>
+                      ) : (
+                        dashStats.recent.map((inq, i) => (
+                          <div key={inq.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: i < dashStats.recent.length - 1 ? '10px' : 0, marginBottom: i < dashStats.recent.length - 1 ? '10px' : 0, borderBottom: i < dashStats.recent.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #2a0000, #550000)', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'Playfair Display', serif", flexShrink: 0 }}>
+                              {inq.name?.charAt(0)?.toUpperCase() || '?'}
+                            </div>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1f2937', fontFamily: "'Lato', sans-serif", margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inq.name}</p>
+                              <p style={{ fontSize: '0.72rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif", margin: 0 }}>{inq.event_type || 'Event'}</p>
+                            </div>
+                            <p style={{ fontSize: '0.7rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif", flexShrink: 0 }}>
+                              {new Date(inq.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Quick actions */}
+                    <div style={{ background: 'white', border: '1px solid #e5e7eb', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b7280', fontFamily: "'Lato', sans-serif", fontWeight: 700, margin: '0 0 1rem' }}>Quick actions</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[
+                          { label: 'Add photo', icon: '🖼', tab: 'Gallery' },
+                          { label: 'Edit colors', icon: '🎨', tab: 'Colors' },
+                          { label: 'View inquiries', icon: '✉', tab: 'Inquiries' },
+                          { label: 'Edit navbar', icon: '☰', tab: 'Navbar' },
+                          { label: 'Edit footer', icon: '⬇', tab: 'Footer' },
+                          { label: 'Edit hero', icon: '✦', tab: 'Hero' },
+                        ].map(({ label, icon, tab }) => (
+                          <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            style={{ background: '#f9fafb', border: '1px solid #e5e7eb', padding: '0.7rem 0.75rem', cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#374151', fontFamily: "'Lato', sans-serif", display: 'flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <span>{icon}</span>{label}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={exportCSV}
+                        style={{ marginTop: '8px', width: '100%', padding: '0.7rem 0.75rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', border: 'none', cursor: 'pointer', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, fontFamily: "'Lato', sans-serif" }}
+                      >
+                        ↓ Export all inquiries CSV
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Breakdown + Sparkline */}
+                  <div className="admin-grid-2">
+                    {/* Inquiry breakdown */}
+                    <div style={{ background: 'white', border: '1px solid #e5e7eb', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b7280', fontFamily: "'Lato', sans-serif", fontWeight: 700, margin: '0 0 1rem' }}>By event type</p>
+                      {Object.keys(dashStats.breakdown).length === 0 ? (
+                        <p style={{ color: '#9ca3af', fontSize: '0.82rem', fontFamily: "'Lato', sans-serif" }}>No data yet.</p>
+                      ) : (
+                        Object.entries(dashStats.breakdown)
+                          .sort((a, b) => b[1] - a[1])
+                          .map(([type, count]) => (
+                            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#6b7280', fontFamily: "'Lato', sans-serif", minWidth: '90px', flexShrink: 0 }}>{type}</span>
+                              <div style={{ flex: 1, height: '6px', background: '#f3f4f6', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${Math.round((count / dashStats.total) * 100)}%`, background: 'linear-gradient(90deg, #d4af37, #b8960c)', borderRadius: '3px' }} />
+                              </div>
+                              <span style={{ fontSize: '0.75rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif", minWidth: '18px', textAlign: 'right' }}>{count}</span>
+                            </div>
+                          ))
+                      )}
+                    </div>
+
+                    {/* Weekly sparkline */}
+                    <div style={{ background: 'white', border: '1px solid #e5e7eb', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b7280', fontFamily: "'Lato', sans-serif", fontWeight: 700, margin: '0 0 1rem' }}>Inquiries per week</p>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '64px' }}>
+                        {dashStats.weekly.map((v, i) => {
+                          const max = Math.max(...dashStats.weekly, 1)
+                          const isLatest = i === dashStats.weekly.length - 1
+                          return (
+                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: '4px' }}>
+                              <span style={{ fontSize: '0.6rem', color: isLatest ? '#d4af37' : '#d1d5db', fontFamily: "'Lato', sans-serif", fontWeight: isLatest ? 700 : 400 }}>{v}</span>
+                              <div style={{ width: '100%', height: `${Math.round((v / max) * 44) + 4}px`, background: isLatest ? 'linear-gradient(180deg, #d4af37, #b8960c)' : '#e5e7eb', borderRadius: '2px 2px 0 0', minHeight: '4px' }} />
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
+                        <span style={{ fontSize: '0.6rem', color: '#d1d5db', fontFamily: "'Lato', sans-serif" }}>6 wks ago</span>
+                        <span style={{ fontSize: '0.6rem', color: '#d4af37', fontFamily: "'Lato', sans-serif", fontWeight: 700 }}>This week</span>
+                      </div>
+                      <div style={{ marginTop: '1.25rem', padding: '0.75rem', background: '#fffdf5', border: '1px solid #d4af3733' }}>
+                        <p style={{ fontSize: '0.72rem', color: '#6b7280', fontFamily: "'Lato', sans-serif", margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: '#d4af37' }}>🔒</span> Auto sign-out after 30 min of inactivity
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
