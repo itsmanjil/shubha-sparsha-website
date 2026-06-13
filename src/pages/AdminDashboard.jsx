@@ -148,6 +148,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false)
   const [savedMsg, setSavedMsg] = useState('')
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [aboutImageDrag, setAboutImageDrag] = useState(false)
 
   const [logoUploading, setLogoUploading] = useState(false)
   const [logoDrag, setLogoDrag] = useState(false)
@@ -626,19 +627,64 @@ export default function AdminDashboard() {
               <Field label="Instagram link text" value={about.followLinkText} onChange={v => setAbout(p => ({ ...p, followLinkText: v }))} />
               <div style={{ marginTop: '0.5rem' }}>
                 <label style={labelStyle}>About Image</label>
-                {about.imageUrl && (
-                  <img src={about.imageUrl} alt="About" style={{ width: '180px', height: '180px', objectFit: 'cover', display: 'block', marginBottom: '0.75rem', border: '1px solid #e5e7eb' }} />
-                )}
                 <input
+                  id="about-image-input"
                   type="file"
                   accept="image/*"
-                  onChange={e => e.target.files[0] && uploadAboutImage(e.target.files[0])}
-                  style={{ fontSize: '0.85rem' }}
+                  style={{ display: 'none' }}
+                  onChange={e => { const f = e.target.files[0]; if (f) uploadAboutImage(f); e.target.value = '' }}
                 />
-                {uploadingImage && <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.82rem' }}>Uploading image…</p>}
-                <p style={{ color: '#9ca3af', marginTop: '0.5rem', fontSize: '0.78rem' }}>
-                  Uploading a new image saves it immediately. Then click Save Changes to persist the URL.
-                </p>
+                {about.imageUrl ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#f9fafb', border: '1px solid #e5e7eb', flexWrap: 'wrap' }}>
+                    <img src={about.imageUrl} alt="About" style={{ width: '90px', height: '90px', objectFit: 'cover', border: '1px solid #e5e7eb', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: '100px' }}>
+                      <p style={{ fontSize: '0.78rem', color: '#374151', fontFamily: "'Lato', sans-serif", margin: '0 0 0.5rem' }}>Current image</p>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => document.getElementById('about-image-input').click()}
+                          style={{ padding: '0.35rem 0.9rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', border: 'none', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+                        >Replace</button>
+                        <button
+                          onClick={() => { const updated = { ...about, imageUrl: '' }; setAbout(updated); doSave('about', updated) }}
+                          style={{ padding: '0.35rem 0.9rem', background: 'transparent', color: '#9ca3af', border: '1px solid #e5e7eb', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+                        >Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => !uploadingImage && document.getElementById('about-image-input').click()}
+                    onDragOver={e => { e.preventDefault(); setAboutImageDrag(true) }}
+                    onDragLeave={() => setAboutImageDrag(false)}
+                    onDrop={e => { e.preventDefault(); setAboutImageDrag(false); const f = e.dataTransfer.files[0]; if (f?.type.startsWith('image/')) uploadAboutImage(f) }}
+                    style={{
+                      border: `2px dashed ${aboutImageDrag ? '#d4af37' : '#e5e7eb'}`,
+                      background: aboutImageDrag ? '#fffdf5' : '#fafafa',
+                      borderRadius: '4px',
+                      minHeight: '120px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: uploadingImage ? 'wait' : 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {uploadingImage ? (
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ width: '20px', height: '20px', border: '2px solid #e5e7eb', borderTopColor: '#d4af37', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 0.5rem' }} />
+                        <p style={{ fontSize: '0.82rem', color: '#9ca3af', fontFamily: "'Lato', sans-serif" }}>Uploading…</p>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '1.5rem' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.3 }}>🌸</div>
+                        <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, fontFamily: "'Lato', sans-serif" }}>
+                          {aboutImageDrag ? 'Drop image here' : 'Drop image here or click to browse'}
+                        </p>
+                        <p style={{ fontSize: '0.7rem', color: '#d1d5db', margin: '0.4rem 0 0', fontFamily: "'Lato', sans-serif" }}>
+                          JPG, PNG, WEBP · Recommended: portrait (4:5 ratio)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Section>
           )}
