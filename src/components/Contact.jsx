@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { FiInstagram, FiMail, FiPhone, FiSend, FiMapPin } from 'react-icons/fi'
+import { FaWhatsapp } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
@@ -52,6 +53,12 @@ export default function Contact() {
     { icon: <FiPhone />, label: 'Phone', value: `+977 ${contactInfo.phone}`, href: `tel:+977${contactInfo.phone}` },
     { icon: <FiMapPin />, label: 'Location', value: contactInfo.address, href: '#' },
   ]
+
+  // WhatsApp deep link — pre-fills an inquiry message. Uses the configured
+  // whatsapp number if set, otherwise falls back to the contact phone.
+  const waNumber = (contactInfo.whatsapp || contactInfo.phone || '').replace(/\D/g, '')
+  const waMessage = `Hi Shubha Sparsha! I'd like to inquire about your event planning services.`
+  const waLink = `https://wa.me/977${waNumber}?text=${encodeURIComponent(waMessage)}`
 
   return (
     <section id="contact" className="py-16 md:py-28" style={{ background: colors.cream }}>
@@ -126,6 +133,18 @@ export default function Contact() {
                   </div>
                 ))}
               </div>
+
+              {/* WhatsApp CTA */}
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 w-full flex items-center justify-center gap-3 px-6 py-3.5 text-sm tracking-[0.15em] uppercase font-semibold transition-all duration-300 hover:opacity-90"
+                style={{ background: '#25D366', color: '#0a3d1f', fontFamily: "'Lato', sans-serif" }}
+              >
+                <FaWhatsapp className="text-xl" />
+                Chat on WhatsApp
+              </a>
             </div>
           </div>
 

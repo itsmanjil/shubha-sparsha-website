@@ -103,15 +103,24 @@ export default async function handler(req, res) {
     `,
   }
 
-  try {
-    // Admin notification must succeed; visitor confirmation is best-effort
-    await transporter.sendMail(adminMail)
-    transporter.sendMail(visitorMail).catch(err => console.error('Visitor confirmation failed:', err.message))
-    return res.status(200).json({ success: true })
-  } catch (err) {
-    console.error('Email send failed:', err.message)
+  // Both sends must be awaited — in serverless, un-awaited promises are
+  // killed when the function freezes after the response is returned.
+  const [adminResult, visitorResult] = await Promise.allSettled([
+    transporter.sendMail(adminMail),
+    transporter.sendMail(visitorMail),
+  ])
+
+  if (visitorResult.status === 'rejected') {
+    console.error('Visitor confirmation failed:', visitorResult.reason?.message)
+  }
+
+  // Admin notification is the critical path
+  if (adminResult.status === 'rejected') {
+    console.error('Admin email failed:', adminResult.reason?.message)
     return res.status(500).json({ error: 'Failed to send email' })
   }
+
+  return res.status(200).json({ success: true, visitorEmailed: visitorResult.status === 'fulfilled' })
 }
 
 function escapeHtml(str) {

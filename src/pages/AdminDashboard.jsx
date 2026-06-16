@@ -990,6 +990,7 @@ export default function AdminDashboard() {
             <div style={{ marginTop: '1.5rem' }} />
             <Section title="Contact Details" onSave={() => doSave('contactInfo', contactInfo)} saving={saving}>
               <Field label="Phone number" value={contactInfo.phone} onChange={v => setContactInfo(p => ({ ...p, phone: v }))} />
+              <Field label="WhatsApp number (leave blank to use phone)" value={contactInfo.whatsapp} onChange={v => setContactInfo(p => ({ ...p, whatsapp: v }))} />
               <Field label="Email address" value={contactInfo.email} onChange={v => setContactInfo(p => ({ ...p, email: v }))} />
               <Field label="Location / Address" value={contactInfo.address} onChange={v => setContactInfo(p => ({ ...p, address: v }))} />
               <Field label="Instagram handle (e.g. @shubhasparshanp)" value={contactInfo.instagramHandle} onChange={v => setContactInfo(p => ({ ...p, instagramHandle: v }))} />

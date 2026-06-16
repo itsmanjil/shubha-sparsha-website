@@ -64,6 +64,7 @@ export const defaultConfig = {
   },
   contactInfo: {
     phone: '9852052172',
+    whatsapp: '',
     email: 'shubhasparshanp@gmail.com',
     address: 'Nepal',
     instagramHandle: '@shubhasparshanp',
