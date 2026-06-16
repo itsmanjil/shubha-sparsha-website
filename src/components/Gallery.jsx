@@ -1,9 +1,31 @@
 import { useEffect, useState } from 'react'
-import { FiInstagram, FiExternalLink, FiImage } from 'react-icons/fi'
+import { FiInstagram, FiImage } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
 const categories = ['All', 'Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
+
+// Masonry tile sizes — cycled by index so heroes appear large and fillers small.
+// grid-auto-flow: dense backfills any gaps the varied spans create.
+const TILE_PATTERN = ['big', 'sm', 'sm', 'tall', 'sm', 'wide', 'sm', 'tall', 'sm', 'sm', 'wide', 'big', 'sm', 'sm']
+const tileClass = (i) => `g-${TILE_PATTERN[i % TILE_PATTERN.length]}`
+
+const GALLERY_CSS = `
+  .g-masonry {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 150px;
+    grid-auto-flow: dense;
+    gap: 12px;
+  }
+  .g-tile { position: relative; overflow: hidden; }
+  .g-big { grid-column: span 2; grid-row: span 2; }
+  .g-tall { grid-row: span 2; }
+  .g-wide { grid-column: span 2; }
+  @media (min-width: 768px) {
+    .g-masonry { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 180px; gap: 16px; }
+  }
+`
 
 export default function Gallery() {
   const { config } = useSiteConfig()
@@ -78,26 +100,42 @@ export default function Gallery() {
           </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
-          {filtered.map((img) => (
+        {/* Masonry mosaic */}
+        <style>{GALLERY_CSS}</style>
+        <div className="g-masonry mb-12">
+          {filtered.map((img, i) => (
             <a
               key={img.id}
               href={contactInfo.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative aspect-square overflow-hidden"
+              className={`g-tile group ${tileClass(i)}`}
             >
               <img
                 src={img.image_url}
                 alt={img.title || 'Event photo'}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
+              {/* Hover caption */}
               <div
-                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: `${colors.maroon}b3` }}
+                className="absolute inset-x-0 bottom-0 p-3 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: `linear-gradient(to top, ${colors.maroon}e6, transparent)`, minHeight: '50%' }}
               >
-                <FiExternalLink className="text-3xl" style={{ color: colors.gold }} />
+                <p
+                  className="text-[10px] tracking-[0.2em] uppercase mb-0.5"
+                  style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
+                >
+                  {img.category}
+                </p>
+                {img.title && (
+                  <p className="text-sm leading-tight" style={{ color: lt, fontFamily: "'Lato', sans-serif" }}>
+                    {img.title}
+                  </p>
+                )}
+              </div>
+              {/* Instagram badge */}
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <FiInstagram className="text-lg" style={{ color: colors.gold }} />
               </div>
             </a>
           ))}
@@ -105,7 +143,7 @@ export default function Gallery() {
           {Array.from({ length: placeholderCount }).map((_, i) => (
             <div
               key={`ph-${i}`}
-              className="aspect-square flex items-center justify-center"
+              className={`g-tile flex items-center justify-center ${tileClass(filtered.length + i)}`}
               style={{ background: `${colors.maroon500}66` }}
             >
               <FiImage className="text-4xl opacity-20" style={{ color: colors.gold }} />
