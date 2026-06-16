@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import emailjs from '@emailjs/browser'
 import { FiInstagram, FiMail, FiPhone, FiSend, FiMapPin } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
@@ -21,38 +20,15 @@ export default function Contact() {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
-  const sendAdminEmail = () =>
-    fetch('https://api.web3forms.com/submit', {
+  const sendEmails = () =>
+    fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        access_key: import.meta.env.VITE_WEB3FORMS_KEY,
-        subject: `New Enquiry from ${form.name} — ${form.event_type || 'Event Planning'}`,
-        from_name: 'Shubha Sparsha Website',
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        event_type: form.event_type,
-        message: form.message,
-      }),
+      body: JSON.stringify(form),
     })
       .then((r) => r.json())
-      .then((d) => { if (!d.success) console.warn('Admin email failed:', d.message) })
-      .catch((err) => console.warn('Admin email error:', err))
-
-  const sendConfirmationEmail = () =>
-    emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      {
-        to_name: form.name,
-        to_email: form.email,
-        event_type: form.event_type || 'your event',
-        message: form.message,
-        phone: form.phone || 'Not provided',
-      },
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
-    ).catch((err) => console.warn('Confirmation email error:', err))
+      .then((d) => { if (!d.success) console.warn('Email send failed:', d.error) })
+      .catch((err) => console.warn('Email send error:', err))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -67,7 +43,7 @@ export default function Contact() {
     }
 
     setStatus('success')
-    Promise.allSettled([sendAdminEmail(), sendConfirmationEmail()])
+    sendEmails()
   }
 
   const contactItems = [
