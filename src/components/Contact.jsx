@@ -57,7 +57,7 @@ export default function Contact() {
   // WhatsApp deep link — pre-fills an inquiry message. Uses the configured
   // whatsapp number if set, otherwise falls back to the contact phone.
   const waNumber = (contactInfo.whatsapp || contactInfo.phone || '').replace(/\D/g, '')
-  const waMessage = `Hi Shubha Sparsha! I'd like to inquire about your event planning services.`
+  const waMessage = `Hi shubhasparshanepal! I'd like to inquire about your event planning services.`
   const waLink = `https://wa.me/977${waNumber}?text=${encodeURIComponent(waMessage)}`
 
   return (
