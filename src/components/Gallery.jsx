@@ -3,8 +3,6 @@ import { FiInstagram, FiImage, FiMail } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-const categories = ['All', 'Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
-
 // Masonry tile sizes — cycled by index so heroes appear large and fillers small.
 // grid-auto-flow: dense backfills any gaps the varied spans create.
 const TILE_PATTERN = ['big', 'sm', 'sm', 'tall', 'sm', 'wide', 'sm', 'tall', 'sm', 'sm', 'wide', 'big', 'sm', 'sm']
@@ -32,7 +30,8 @@ const GALLERY_CSS = `
 
 export default function Gallery() {
   const { config } = useSiteConfig()
-  const { colors, contactInfo, gallerySection } = config
+  const { colors, contactInfo, gallerySection, galleryCategories = [] } = config
+  const categories = ['All', ...galleryCategories]
   const lt = colors.lightText || '#f7ecd0'
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')

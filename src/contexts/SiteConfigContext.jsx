@@ -94,6 +94,7 @@ export const defaultConfig = {
     titleAccent: 'Portfolio',
     instagramButton: 'View Full Portfolio on Instagram',
   },
+  galleryCategories: ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies'],
   contactInfo: {
     phone: '9852052172',
     whatsapp: '',

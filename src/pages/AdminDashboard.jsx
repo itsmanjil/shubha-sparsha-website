@@ -5,7 +5,6 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 import { compressImage } from '../lib/compressImage'
 
 const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Process', 'Testimonials', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
-const GALLERY_CATEGORIES = ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 const ADMIN_CSS = `
   @keyframes spin { to { transform: rotate(360deg) } }
@@ -163,7 +162,7 @@ export default function AdminDashboard() {
   const [galleryImages, setGalleryImages] = useState([])
   const [galleryLoading, setGalleryLoading] = useState(false)
   const [galleryUploading, setGalleryUploading] = useState(false)
-  const [newPhoto, setNewPhoto] = useState({ title: '', category: 'Weddings', file: null, preview: null })
+  const [newPhoto, setNewPhoto] = useState({ title: '', category: config.galleryCategories?.[0] || '', file: null, preview: null })
   const [dragOver, setDragOver] = useState(false)
 
   const [inquiries, setInquiries] = useState([])
@@ -191,6 +190,8 @@ export default function AdminDashboard() {
   const [testimonials, setTestimonials] = useState((config.testimonials || []).map(t => ({ ...t })))
   const [testimonialUploadingIdx, setTestimonialUploadingIdx] = useState(null)
   const [gallerySection, setGallerySection] = useState({ ...config.gallerySection })
+  const [galleryCategories, setGalleryCategories] = useState([...(config.galleryCategories || [])])
+  const [newCategory, setNewCategory] = useState('')
   const [contactSection, setContactSection] = useState({ ...config.contactSection })
   const [contactInfo, setContactInfo] = useState({ ...config.contactInfo })
   const [footer, setFooter] = useState({ ...config.footer })
@@ -362,6 +363,35 @@ export default function AdminDashboard() {
     setGalleryLoading(false)
   }
 
+  function addGalleryCategory() {
+    const name = newCategory.trim()
+    if (!name) return
+    if (galleryCategories.some(c => c.toLowerCase() === name.toLowerCase())) {
+      setSavedMsg('Error: that category already exists')
+      return
+    }
+    const updated = [...galleryCategories, name]
+    setGalleryCategories(updated)
+    setNewCategory('')
+    doSave('galleryCategories', updated)
+  }
+
+  function removeGalleryCategory(name) {
+    if (!confirm(`Remove "${name}"? Existing photos tagged with it will stay in the gallery but won't appear under any filter button.`)) return
+    const updated = galleryCategories.filter(c => c !== name)
+    setGalleryCategories(updated)
+    doSave('galleryCategories', updated)
+  }
+
+  function moveGalleryCategory(i, dir) {
+    const target = i + dir
+    if (target < 0 || target >= galleryCategories.length) return
+    const updated = [...galleryCategories]
+    ;[updated[i], updated[target]] = [updated[target], updated[i]]
+    setGalleryCategories(updated)
+    doSave('galleryCategories', updated)
+  }
+
   async function uploadGalleryPhoto() {
     if (!newPhoto.file) return
     setGalleryUploading(true)
@@ -378,7 +408,7 @@ export default function AdminDashboard() {
         category: newPhoto.category,
       }])
       if (dbErr) throw dbErr
-      setNewPhoto({ title: '', category: 'Weddings', file: null, preview: null })
+      setNewPhoto({ title: '', category: galleryCategories[0] || '', file: null, preview: null })
       await fetchGallery()
       setSavedMsg('Photo uploaded!')
       setTimeout(() => setSavedMsg(''), 3000)
@@ -1282,6 +1312,7 @@ export default function AdminDashboard() {
 
           {/* GALLERY SECTION */}
           {activeTab === 'Gallery Section' && (
+            <>
             <Section title="Gallery Section Header" onSave={() => doSave('gallerySection', gallerySection)} saving={saving}>
               <Field label="Section label (small caps above title)" value={gallerySection.label} onChange={v => setGallerySection(p => ({ ...p, label: v }))} />
               <div className="admin-grid-2">
@@ -1290,6 +1321,50 @@ export default function AdminDashboard() {
               </div>
               <Field label="Instagram button text" value={gallerySection.instagramButton} onChange={v => setGallerySection(p => ({ ...p, instagramButton: v }))} />
             </Section>
+
+            <div style={{ marginTop: '1.5rem' }} />
+            <div className="admin-section">
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2a0000', marginTop: 0, marginBottom: '0.5rem', paddingBottom: '1rem', borderBottom: '2px solid #f3f4f6' }}>
+                Gallery Categories
+              </h2>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', fontFamily: "'Lato', sans-serif", lineHeight: 1.6 }}>
+                These appear as filter buttons on the live gallery and as category choices when uploading a photo. Add, remove, or reorder them — changes save immediately, no need to press a separate save button.
+              </p>
+
+              {galleryCategories.length === 0 ? (
+                <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: '1.25rem' }}>No categories yet — add one below.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                  {galleryCategories.map((cat, i) => (
+                    <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.85rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
+                      <span style={{ flex: 1, fontSize: '0.85rem', color: '#1f2937', fontFamily: "'Lato', sans-serif", fontWeight: 600 }}>{cat}</span>
+                      <button type="button" onClick={() => moveGalleryCategory(i, -1)} disabled={i === 0} title="Move up" style={{ width: '26px', height: '26px', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.75rem' }}>↑</button>
+                      <button type="button" onClick={() => moveGalleryCategory(i, 1)} disabled={i === galleryCategories.length - 1} title="Move down" style={{ width: '26px', height: '26px', border: '1px solid #e5e7eb', background: 'white', cursor: i === galleryCategories.length - 1 ? 'not-allowed' : 'pointer', color: i === galleryCategories.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.75rem' }}>↓</button>
+                      <button type="button" onClick={() => removeGalleryCategory(cat)} title="Remove" style={{ height: '26px', padding: '0 0.6rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  value={newCategory}
+                  onChange={e => setNewCategory(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addGalleryCategory() } }}
+                  placeholder="e.g. Engagements"
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={addGalleryCategory}
+                  style={{ padding: '0 1.25rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', border: 'none', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif", whiteSpace: 'nowrap' }}
+                >
+                  + Add
+                </button>
+              </div>
+            </div>
+            </>
           )}
 
           {/* CONTACT */}
@@ -1353,7 +1428,7 @@ export default function AdminDashboard() {
                       onChange={e => setNewPhoto(p => ({ ...p, category: e.target.value }))}
                       style={inputStyle}
                     >
-                      {GALLERY_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {galleryCategories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
