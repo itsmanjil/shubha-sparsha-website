@@ -36,9 +36,9 @@ export default function Services() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {services.map((s) => (
+          {services.map((s, i) => (
             <div
-              key={s.title}
+              key={i}
               className="group relative overflow-hidden border transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
               style={{ borderColor: `${colors.gold}4D`, background: colors.cream }}
             >
@@ -71,7 +71,7 @@ export default function Services() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  {(Array.isArray(s.tags) ? s.tags : s.tags.split(',').map(t => t.trim())).map((tag) => (
+                  {(Array.isArray(s.tags) ? s.tags : String(s.tags || '').split(',').map(t => t.trim())).filter(Boolean).map((tag) => (
                     <span
                       key={tag}
                       className="text-xs px-3 py-1 tracking-wide"

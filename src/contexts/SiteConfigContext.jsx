@@ -56,6 +56,17 @@ export const defaultConfig = {
     { emoji: '🌸', title: 'Engagement Ceremonies', subtitle: 'Roka, Sagai & Ring Ceremonies', desc: 'Set the perfect tone for your love story with a beautifully orchestrated engagement celebration.', tags: ['Ring Exchange Setup', 'Family Coordination', 'Decor', 'Mehendi'] },
     { emoji: '✨', title: 'Social Gatherings', subtitle: 'House Warmings & Anniversaries', desc: 'Every occasion is worth celebrating beautifully — griha pravesh, anniversaries, baby showers, and more.', tags: ['Custom Themes', 'Invitations', 'Decor', 'Catering'] },
   ],
+  portfolioSection: {
+    label: 'Featured Work',
+    title: 'Signature',
+    titleAccent: 'Celebrations',
+    desc: 'A closer look at a few celebrations we have brought to life.',
+  },
+  portfolio: [
+    { coverImage: '', type: 'Wedding', name: 'A Grand Traditional Wedding', description: 'A three-day celebration blending sacred rituals with modern elegance — from the mandap ceremony to a breathtaking reception, every detail orchestrated with care.' },
+    { coverImage: '', type: 'Corporate Event', name: 'Annual Awards Night', description: 'A polished corporate gala with bespoke stage design, branding, and seamless hospitality for over 300 guests.' },
+    { coverImage: '', type: 'Religious Ceremony', name: 'Auspicious Griha Pravesh', description: 'A serene house-warming ceremony with authentic puja arrangements, traditional décor, and warm family hospitality.' },
+  ],
   gallerySection: {
     label: 'Our Work',
     title: 'Event',

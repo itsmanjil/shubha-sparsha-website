@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 import { compressImage } from '../lib/compressImage'
 
-const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
+const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 const GALLERY_CATEGORIES = ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 const ADMIN_CSS = `
@@ -182,6 +182,9 @@ export default function AdminDashboard() {
   const [services, setServices] = useState(
     config.services.map(s => ({ ...s, tags: Array.isArray(s.tags) ? s.tags.join(', ') : s.tags }))
   )
+  const [portfolioSection, setPortfolioSection] = useState({ ...config.portfolioSection })
+  const [portfolio, setPortfolio] = useState((config.portfolio || []).map(p => ({ ...p })))
+  const [portfolioUploadingIdx, setPortfolioUploadingIdx] = useState(null)
   const [gallerySection, setGallerySection] = useState({ ...config.gallerySection })
   const [contactSection, setContactSection] = useState({ ...config.contactSection })
   const [contactInfo, setContactInfo] = useState({ ...config.contactInfo })
@@ -397,6 +400,62 @@ export default function AdminDashboard() {
         : s.tags,
     }))
     doSave('services', parsed)
+  }
+
+  function addService() {
+    setServices(prev => [...prev, { emoji: '✨', title: 'New Service', subtitle: '', desc: '', tags: '' }])
+  }
+
+  function removeService(i) {
+    if (!confirm('Remove this service card?')) return
+    setServices(prev => prev.filter((_, j) => j !== i))
+  }
+
+  function moveService(i, dir) {
+    setServices(prev => {
+      const target = i + dir
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[i], next[target]] = [next[target], next[i]]
+      return next
+    })
+  }
+
+  function addPortfolio() {
+    setPortfolio(prev => [...prev, { coverImage: '', type: '', name: 'New Event', description: '' }])
+  }
+
+  function removePortfolio(i) {
+    if (!confirm('Remove this portfolio entry?')) return
+    setPortfolio(prev => prev.filter((_, j) => j !== i))
+  }
+
+  function movePortfolio(i, dir) {
+    setPortfolio(prev => {
+      const target = i + dir
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[i], next[target]] = [next[target], next[i]]
+      return next
+    })
+  }
+
+  async function uploadPortfolioCover(i, file) {
+    if (!file || !file.type.startsWith('image/')) return
+    setPortfolioUploadingIdx(i)
+    try {
+      const compressed = await compressImage(file)
+      const ext = compressed.name.split('.').pop()
+      const path = `portfolio/${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('site-images').upload(path, compressed)
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
+      setPortfolio(prev => prev.map((p, j) => j === i ? { ...p, coverImage: publicUrl } : p))
+    } catch (e) {
+      setSavedMsg('Error: ' + e.message)
+    } finally {
+      setPortfolioUploadingIdx(null)
+    }
   }
 
   return (
@@ -948,11 +1007,38 @@ export default function AdminDashboard() {
             </Section>
             <div style={{ marginTop: '1.5rem' }} />
             <Section title="Service Cards" onSave={saveServices} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                Add, reorder, or remove the service cards shown on the homepage. Changes apply once you press <strong>Save Changes</strong>.
+              </p>
               {services.map((svc, i) => (
                 <div key={i} style={{ marginBottom: '2rem', padding: '1.25rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
-                  <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af37', marginBottom: '1.25rem', fontWeight: 700 }}>
-                    Service {i + 1}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af37', margin: 0, fontWeight: 700 }}>
+                      Service {i + 1}
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => moveService(i, -1)}
+                        disabled={i === 0}
+                        title="Move up"
+                        style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}
+                      >↑</button>
+                      <button
+                        type="button"
+                        onClick={() => moveService(i, 1)}
+                        disabled={i === services.length - 1}
+                        title="Move down"
+                        style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === services.length - 1 ? 'not-allowed' : 'pointer', color: i === services.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}
+                      >↓</button>
+                      <button
+                        type="button"
+                        onClick={() => removeService(i)}
+                        title="Remove"
+                        style={{ height: '28px', padding: '0 0.7rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}
+                      >Remove</button>
+                    </div>
+                  </div>
                   <div className="admin-grid-service">
                     <Field label="Emoji" value={svc.emoji} onChange={v => setServices(prev => prev.map((s, j) => j === i ? { ...s, emoji: v } : s))} />
                     <Field label="Title" value={svc.title} onChange={v => setServices(prev => prev.map((s, j) => j === i ? { ...s, title: v } : s))} />
@@ -962,6 +1048,88 @@ export default function AdminDashboard() {
                   <Field label="Tags (comma-separated)" value={svc.tags} onChange={v => setServices(prev => prev.map((s, j) => j === i ? { ...s, tags: v } : s))} />
                 </div>
               ))}
+              <button
+                type="button"
+                onClick={addService}
+                style={{ width: '100%', padding: '0.85rem', border: '2px dashed #d4af37', background: '#fffdf5', color: '#7a5f06', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+              >
+                + Add Service Card
+              </button>
+            </Section>
+            </>
+          )}
+
+          {/* PORTFOLIO */}
+          {activeTab === 'Portfolio' && (
+            <>
+            <Section title="Portfolio Section Header" onSave={() => doSave('portfolioSection', portfolioSection)} saving={saving}>
+              <Field label="Section label (small caps above title)" value={portfolioSection.label} onChange={v => setPortfolioSection(p => ({ ...p, label: v }))} />
+              <div className="admin-grid-2">
+                <Field label="Title — first word(s)" value={portfolioSection.title} onChange={v => setPortfolioSection(p => ({ ...p, title: v }))} />
+                <Field label="Title — italic accent word" value={portfolioSection.titleAccent} onChange={v => setPortfolioSection(p => ({ ...p, titleAccent: v }))} />
+              </div>
+              <Field label="Description paragraph" value={portfolioSection.desc} onChange={v => setPortfolioSection(p => ({ ...p, desc: v }))} multiline />
+            </Section>
+            <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Featured Events" onSave={() => doSave('portfolio', portfolio)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                Showcase real events as case studies. Each appears as a large image-and-story row on the homepage with a “Plan an event like this” button. Tip: set the <strong>Event type</strong> to match a contact-form option (Wedding, Birthday, Corporate Event, Religious Ceremony, Engagement) so the button pre-fills it. Changes apply once you press <strong>Save Changes</strong>.
+              </p>
+              {portfolio.map((entry, i) => (
+                <div key={i} style={{ marginBottom: '2rem', padding: '1.25rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af37', margin: 0, fontWeight: 700 }}>
+                      Event {i + 1}
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button type="button" onClick={() => movePortfolio(i, -1)} disabled={i === 0} title="Move up" style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}>↑</button>
+                      <button type="button" onClick={() => movePortfolio(i, 1)} disabled={i === portfolio.length - 1} title="Move down" style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === portfolio.length - 1 ? 'not-allowed' : 'pointer', color: i === portfolio.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}>↓</button>
+                      <button type="button" onClick={() => removePortfolio(i)} title="Remove" style={{ height: '28px', padding: '0 0.7rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>Remove</button>
+                    </div>
+                  </div>
+
+                  {/* Cover image */}
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                    <div style={{ width: '140px', height: '105px', flexShrink: 0, background: '#f3f4f6', border: '1px solid #e5e7eb', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {entry.coverImage
+                        ? <img src={entry.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span style={{ fontSize: '1.5rem', opacity: 0.3 }}>📸</span>}
+                    </div>
+                    <div style={{ flex: 1, minWidth: '160px' }}>
+                      <label style={labelStyle}>Cover image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id={`pf-cover-${i}`}
+                        style={{ display: 'none' }}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPortfolioCover(i, f); e.target.value = '' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById(`pf-cover-${i}`).click()}
+                        disabled={portfolioUploadingIdx === i}
+                        style={{ padding: '0.5rem 1rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', border: 'none', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700, cursor: portfolioUploadingIdx === i ? 'wait' : 'pointer', fontFamily: "'Lato', sans-serif" }}
+                      >
+                        {portfolioUploadingIdx === i ? 'Uploading…' : entry.coverImage ? 'Replace photo' : 'Upload photo'}
+                      </button>
+                      <p style={{ fontSize: '0.7rem', color: '#9ca3af', margin: '0.5rem 0 0' }}>Large photos are auto-compressed before upload.</p>
+                    </div>
+                  </div>
+
+                  <div className="admin-grid-2">
+                    <Field label="Event type (e.g. Wedding)" value={entry.type} onChange={v => setPortfolio(prev => prev.map((p, j) => j === i ? { ...p, type: v } : p))} />
+                    <Field label="Event name / title" value={entry.name} onChange={v => setPortfolio(prev => prev.map((p, j) => j === i ? { ...p, name: v } : p))} />
+                  </div>
+                  <Field label="Description / story" value={entry.description} onChange={v => setPortfolio(prev => prev.map((p, j) => j === i ? { ...p, description: v } : p))} multiline />
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addPortfolio}
+                style={{ width: '100%', padding: '0.85rem', border: '2px dashed #d4af37', background: '#fffdf5', color: '#7a5f06', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+              >
+                + Add Featured Event
+              </button>
             </Section>
             </>
           )}

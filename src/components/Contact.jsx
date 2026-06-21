@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FiInstagram, FiMail, FiPhone, FiSend, FiMapPin } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
@@ -20,6 +20,28 @@ export default function Contact() {
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+
+  // Pre-fill from a Portfolio "Plan an event like this" click
+  useEffect(() => {
+    const handler = (e) => {
+      const { type, name } = e.detail || {}
+      const matched =
+        eventTypes.find(
+          (t) =>
+            type &&
+            (t.toLowerCase() === type.toLowerCase() ||
+              t.toLowerCase().includes(type.toLowerCase()) ||
+              type.toLowerCase().includes(t.toLowerCase()))
+        ) || 'Other'
+      setForm((prev) => ({
+        ...prev,
+        event_type: matched,
+        message: prev.message || `I'd love to plan an event like "${name}". Please share how we can begin.`,
+      }))
+    }
+    window.addEventListener('prefill-contact', handler)
+    return () => window.removeEventListener('prefill-contact', handler)
+  }, [])
 
   const sendEmails = () =>
     fetch('/api/send-email', {
