@@ -6,6 +6,14 @@ import { compressImage } from '../lib/compressImage'
 
 const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Process', 'Testimonials', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 
+function friendlyUploadError(e) {
+  const msg = e?.message || String(e)
+  if (/exceed|too large|maximum allowed size|payload too large/i.test(msg)) {
+    return 'This photo is still too large for storage even after compression. Try a smaller or simpler image, or contact support to raise the storage limit.'
+  }
+  return msg
+}
+
 // Valid on-page section anchors a nav link can point to — keep in sync with
 // the `id` attribute on each <section> in App.jsx's homepage.
 const SECTION_OPTIONS = [
@@ -244,7 +252,7 @@ export default function AdminDashboard() {
       setSavedMsg('Logo updated!')
       setTimeout(() => setSavedMsg(''), 3000)
     } catch (e) {
-      setSavedMsg('Error: ' + e.message)
+      setSavedMsg('Error: ' + friendlyUploadError(e))
     } finally {
       setLogoUploading(false)
     }
@@ -259,7 +267,7 @@ export default function AdminDashboard() {
   async function uploadHeroSlide(file) {
     setHeroSlideUploading(true)
     try {
-      const compressed = await compressImage(file, { maxDim: 2000 })
+      const compressed = await compressImage(file, { targetBytes: 1.5 * 1024 * 1024 })
       const ext = compressed.name.split('.').pop()
       const path = `hero/${Date.now()}.${ext}`
       const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, compressed)
@@ -271,7 +279,7 @@ export default function AdminDashboard() {
       setSavedMsg('Slide added!')
       setTimeout(() => setSavedMsg(''), 3000)
     } catch (e) {
-      setSavedMsg('Error: ' + e.message)
+      setSavedMsg('Error: ' + friendlyUploadError(e))
     } finally {
       setHeroSlideUploading(false)
     }
@@ -301,7 +309,7 @@ export default function AdminDashboard() {
       setAbout(updated)
       await doSave('about', updated)
     } catch (e) {
-      alert('Image upload failed: ' + e.message)
+      alert('Image upload failed: ' + friendlyUploadError(e))
     } finally {
       setUploadingImage(false)
     }
@@ -477,7 +485,7 @@ export default function AdminDashboard() {
       setSavedMsg('Photo uploaded!')
       setTimeout(() => setSavedMsg(''), 3000)
     } catch (e) {
-      setSavedMsg('Error: ' + e.message)
+      setSavedMsg('Error: ' + friendlyUploadError(e))
     } finally {
       setGalleryUploading(false)
     }
@@ -570,7 +578,7 @@ export default function AdminDashboard() {
       const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
       setPortfolio(prev => prev.map((p, j) => j === i ? { ...p, coverImage: publicUrl } : p))
     } catch (e) {
-      setSavedMsg('Error: ' + e.message)
+      setSavedMsg('Error: ' + friendlyUploadError(e))
     } finally {
       setPortfolioUploadingIdx(null)
     }
@@ -607,7 +615,7 @@ export default function AdminDashboard() {
       const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
       setTestimonials(prev => prev.map((t, j) => j === i ? { ...t, photoUrl: publicUrl } : t))
     } catch (e) {
-      setSavedMsg('Error: ' + e.message)
+      setSavedMsg('Error: ' + friendlyUploadError(e))
     } finally {
       setTestimonialUploadingIdx(null)
     }
@@ -1631,6 +1639,7 @@ export default function AdminDashboard() {
                     style={{ display: 'none' }}
                     onChange={e => {
                       const file = e.target.files[0]
+                      e.target.value = ''
                       if (!file) return
                       setNewPhoto(p => ({ ...p, file, preview: URL.createObjectURL(file) }))
                     }}
