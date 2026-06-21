@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FiInstagram, FiImage } from 'react-icons/fi'
+import { FiInstagram, FiImage, FiMail } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
@@ -18,7 +18,10 @@ const GALLERY_CSS = `
     grid-auto-flow: dense;
     gap: 12px;
   }
-  .g-tile { position: relative; overflow: hidden; }
+  .g-tile {
+    position: relative; overflow: hidden; display: block; width: 100%; height: 100%;
+    padding: 0; margin: 0; border: none; background: none; cursor: pointer; font: inherit;
+  }
   .g-big { grid-column: span 2; grid-row: span 2; }
   .g-tall { grid-row: span 2; }
   .g-wide { grid-column: span 2; }
@@ -55,6 +58,11 @@ export default function Gallery() {
 
   const filtered = filter === 'All' ? images : images.filter((img) => img.category === filter)
   const placeholderCount = Math.max(0, 6 - filtered.length)
+
+  function planLikeThis(img) {
+    window.dispatchEvent(new CustomEvent('prefill-contact', { detail: { type: img.category, name: img.title || img.category } }))
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
     <section id="gallery" className="py-16 md:py-28" style={{ background: colors.maroon }}>
@@ -104,12 +112,12 @@ export default function Gallery() {
         <style>{GALLERY_CSS}</style>
         <div className="g-masonry mb-12">
           {filtered.map((img, i) => (
-            <a
+            <button
               key={img.id}
-              href={contactInfo.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`g-tile group ${tileClass(i)}`}
+              type="button"
+              onClick={() => planLikeThis(img)}
+              aria-label={`Enquire about a ${img.category} event like "${img.title || img.category}"`}
+              className={`g-tile group text-left ${tileClass(i)}`}
             >
               <img
                 src={img.image_url}
@@ -133,11 +141,11 @@ export default function Gallery() {
                   </p>
                 )}
               </div>
-              {/* Instagram badge */}
+              {/* Enquire badge */}
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <FiInstagram className="text-lg" style={{ color: colors.gold }} />
+                <FiMail className="text-lg" style={{ color: colors.gold }} />
               </div>
-            </a>
+            </button>
           ))}
 
           {Array.from({ length: placeholderCount }).map((_, i) => (

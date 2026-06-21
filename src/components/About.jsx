@@ -1,10 +1,13 @@
+import { Link } from 'react-scroll'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
+import { darken } from '../lib/color'
 
 export default function About() {
   const { config } = useSiteConfig()
-  const { colors, about, stats, contactInfo } = config
+  const { colors, about, stats } = config
   const dt = colors.darkText || '#5c4604'
   const lt = colors.lightText || '#f7ecd0'
+  const eyebrow = darken(colors.gold, 35)
 
   return (
     <section id="about" className="py-16 md:py-28" style={{ background: colors.cream }}>
@@ -13,7 +16,7 @@ export default function About() {
         <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
-            style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
+            style={{ color: eyebrow, fontFamily: "'Lato', sans-serif", fontWeight: 700 }}
           >
             {about.subheading}
           </p>
@@ -76,11 +79,12 @@ export default function About() {
             >
               {about.paragraph2}
             </p>
-            <a
-              href={contactInfo.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5"
+            <Link
+              to="contact"
+              smooth
+              duration={600}
+              offset={-80}
+              className="cursor-pointer inline-flex items-center gap-3 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5"
               style={{ color: colors.maroon500, fontFamily: "'Lato', sans-serif" }}
             >
               {about.followLinkText}
@@ -88,7 +92,7 @@ export default function About() {
                 className="h-px w-12 inline-block transition-all duration-300"
                 style={{ background: colors.maroon500 }}
               />
-            </a>
+            </Link>
           </div>
         </div>
 

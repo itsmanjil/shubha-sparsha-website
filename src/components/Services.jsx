@@ -4,9 +4,10 @@ export default function Services() {
   const { config } = useSiteConfig()
   const { colors, services, servicesSection } = config
   const dt = colors.darkText || '#5c4604'
+  const lt = colors.lightText || '#f7ecd0'
 
   return (
-    <section id="services" className="py-16 md:py-28" style={{ background: colors.cream }}>
+    <section id="services" className="py-16 md:py-28" style={{ background: colors.maroon }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Section header */}
         <div className="text-center mb-12 md:mb-20">
@@ -18,9 +19,9 @@ export default function Services() {
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
-            style={{ fontFamily: "'Playfair Display', serif", color: colors.maroon }}
+            style={{ fontFamily: "'Playfair Display', serif", color: lt }}
           >
-            {servicesSection.title} <em style={{ color: colors.maroon500 }}>{servicesSection.titleAccent}</em>
+            {servicesSection.title} <em style={{ color: colors.gold }}>{servicesSection.titleAccent}</em>
           </h2>
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-16" style={{ background: colors.gold }} />
@@ -28,8 +29,8 @@ export default function Services() {
             <div className="h-px w-16" style={{ background: colors.gold }} />
           </div>
           <p
-            className="text-gray-600 max-w-xl mx-auto text-lg"
-            style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+            className="max-w-xl mx-auto text-lg"
+            style={{ color: `${lt}b3`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
           >
             {servicesSection.desc}
           </p>
@@ -53,7 +54,7 @@ export default function Services() {
 
                 <p
                   className="text-xs tracking-[0.3em] uppercase mb-2"
-                  style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
+                  style={{ color: '#7a5f06', fontFamily: "'Lato', sans-serif", fontWeight: 700 }}
                 >
                   {s.subtitle}
                 </p>

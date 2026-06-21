@@ -1,9 +1,11 @@
 import { useSiteConfig } from '../contexts/SiteConfigContext'
+import { darken } from '../lib/color'
 
 export default function Portfolio() {
   const { config } = useSiteConfig()
   const { colors, portfolio = [], portfolioSection } = config
   const dt = colors.darkText || '#5c4604'
+  const eyebrow = darken(colors.gold, 35)
 
   if (!portfolio.length) return null
 
@@ -20,7 +22,7 @@ export default function Portfolio() {
         <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
-            style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
+            style={{ color: eyebrow, fontFamily: "'Lato', sans-serif", fontWeight: 700 }}
           >
             {portfolioSection.label}
           </p>

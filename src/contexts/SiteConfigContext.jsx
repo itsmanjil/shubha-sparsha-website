@@ -24,7 +24,7 @@ export const defaultConfig = {
     titleItalic: 'That Last Forever',
     subtitle: 'From intimate gatherings to grand celebrations — we orchestrate every detail with elegance, passion, and an auspicious touch.',
     servicesButton: 'Our Services',
-    instagramButton: 'Instagram',
+    quoteButton: 'Get a Free Quote',
     sliderInterval: 5,
   },
   heroSlides: [],
@@ -34,7 +34,7 @@ export const defaultConfig = {
     paragraph1: 'Shubha Sparsha — meaning "auspicious touch" — was founded on the belief that every celebration deserves to be extraordinary. We are passionate event planners dedicated to turning your vision into reality.',
     paragraph2: 'From the grandeur of wedding mandaps to the joy of birthday soirées, we bring meticulous attention to detail, creative flair, and genuine care to every event we craft. Our team works closely with you to understand your culture, traditions, and personal style.',
     imageUrl: '',
-    followLinkText: 'Follow Our Journey',
+    followLinkText: "Let's Plan Together",
   },
   stats: [
     { value: '200+', label: 'Events Planned' },
@@ -66,6 +66,27 @@ export const defaultConfig = {
     { coverImage: '', type: 'Wedding', name: 'A Grand Traditional Wedding', description: 'A three-day celebration blending sacred rituals with modern elegance — from the mandap ceremony to a breathtaking reception, every detail orchestrated with care.' },
     { coverImage: '', type: 'Corporate Event', name: 'Annual Awards Night', description: 'A polished corporate gala with bespoke stage design, branding, and seamless hospitality for over 300 guests.' },
     { coverImage: '', type: 'Religious Ceremony', name: 'Auspicious Griha Pravesh', description: 'A serene house-warming ceremony with authentic puja arrangements, traditional décor, and warm family hospitality.' },
+  ],
+  processSection: {
+    label: 'How We Work',
+    title: 'Your Journey With',
+    titleAccent: 'Us',
+  },
+  processSteps: [
+    { number: '01', title: 'Consult', desc: 'Share your vision, traditions, and budget with us in a free initial consultation.' },
+    { number: '02', title: 'Plan', desc: 'We craft a detailed plan covering venue, décor, catering, and every logistic in between.' },
+    { number: '03', title: 'Coordinate', desc: 'Our team manages vendors and timelines so you can stay present in the moment.' },
+    { number: '04', title: 'Celebrate', desc: 'You enjoy the celebration while we handle every detail behind the scenes.' },
+  ],
+  testimonialsSection: {
+    label: 'Kind Words',
+    title: 'What Our',
+    titleAccent: 'Clients Say',
+  },
+  testimonials: [
+    { name: 'Priya & Rajan Sharma', eventType: 'Wedding', quote: 'Shubha Sparsha made our wedding day absolutely magical. Every detail, from the mandap to the reception, was handled with such care and elegance. We could not have asked for a better team.', photoUrl: '' },
+    { name: 'Anita Gurung', eventType: 'Birthday', quote: 'They planned my daughter\'s birthday party and it exceeded every expectation. Professional, creative, and so easy to work with throughout.', photoUrl: '' },
+    { name: 'Bikash Poudel', eventType: 'Corporate Event', quote: 'Our annual awards night was flawless thanks to their team. The attention to detail and on-the-day coordination was outstanding.', photoUrl: '' },
   ],
   gallerySection: {
     label: 'Our Work',

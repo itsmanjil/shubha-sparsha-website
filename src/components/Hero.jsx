@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-scroll'
-import { FiInstagram, FiArrowDown } from 'react-icons/fi'
+import { FiArrowDown } from 'react-icons/fi'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
 export default function Hero() {
   const { config } = useSiteConfig()
-  const { colors, hero, contactInfo, heroSlides } = config
+  const { colors, hero, heroSlides } = config
   const lt = colors.lightText || '#f7ecd0'
   const slides = Array.isArray(heroSlides) ? heroSlides : []
   const hasSlides = slides.length > 0
@@ -122,16 +122,16 @@ export default function Hero() {
           >
             {hero.servicesButton}
           </Link>
-          <a
-            href={contactInfo.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 px-8 md:px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300"
+          <Link
+            to="contact"
+            smooth
+            duration={600}
+            offset={-80}
+            className="cursor-pointer flex items-center justify-center gap-2 px-8 md:px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300"
             style={{ border: `1px solid ${colors.gold}99`, color: colors.gold, fontFamily: "'Lato', sans-serif" }}
           >
-            <FiInstagram />
-            {hero.instagramButton}
-          </a>
+            {hero.quoteButton || 'Get a Free Quote'}
+          </Link>
         </div>
       </div>
 

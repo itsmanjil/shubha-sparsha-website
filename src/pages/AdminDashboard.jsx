@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 import { compressImage } from '../lib/compressImage'
 
-const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
+const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Process', 'Testimonials', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 const GALLERY_CATEGORIES = ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
 
 const ADMIN_CSS = `
@@ -185,6 +185,11 @@ export default function AdminDashboard() {
   const [portfolioSection, setPortfolioSection] = useState({ ...config.portfolioSection })
   const [portfolio, setPortfolio] = useState((config.portfolio || []).map(p => ({ ...p })))
   const [portfolioUploadingIdx, setPortfolioUploadingIdx] = useState(null)
+  const [processSection, setProcessSection] = useState({ ...config.processSection })
+  const [processSteps, setProcessSteps] = useState((config.processSteps || []).map(s => ({ ...s })))
+  const [testimonialsSection, setTestimonialsSection] = useState({ ...config.testimonialsSection })
+  const [testimonials, setTestimonials] = useState((config.testimonials || []).map(t => ({ ...t })))
+  const [testimonialUploadingIdx, setTestimonialUploadingIdx] = useState(null)
   const [gallerySection, setGallerySection] = useState({ ...config.gallerySection })
   const [contactSection, setContactSection] = useState({ ...config.contactSection })
   const [contactInfo, setContactInfo] = useState({ ...config.contactInfo })
@@ -455,6 +460,43 @@ export default function AdminDashboard() {
       setSavedMsg('Error: ' + e.message)
     } finally {
       setPortfolioUploadingIdx(null)
+    }
+  }
+
+  function addTestimonial() {
+    setTestimonials(prev => [...prev, { name: 'New Client', eventType: '', quote: '', photoUrl: '' }])
+  }
+
+  function removeTestimonial(i) {
+    if (!confirm('Remove this testimonial?')) return
+    setTestimonials(prev => prev.filter((_, j) => j !== i))
+  }
+
+  function moveTestimonial(i, dir) {
+    setTestimonials(prev => {
+      const target = i + dir
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[i], next[target]] = [next[target], next[i]]
+      return next
+    })
+  }
+
+  async function uploadTestimonialPhoto(i, file) {
+    if (!file || !file.type.startsWith('image/')) return
+    setTestimonialUploadingIdx(i)
+    try {
+      const compressed = await compressImage(file)
+      const ext = compressed.name.split('.').pop()
+      const path = `testimonials/${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('site-images').upload(path, compressed)
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
+      setTestimonials(prev => prev.map((t, j) => j === i ? { ...t, photoUrl: publicUrl } : t))
+    } catch (e) {
+      setSavedMsg('Error: ' + e.message)
+    } finally {
+      setTestimonialUploadingIdx(null)
     }
   }
 
@@ -801,7 +843,7 @@ export default function AdminDashboard() {
               <Field label="Title — italic second line" value={hero.titleItalic} onChange={v => setHero(p => ({ ...p, titleItalic: v }))} />
               <Field label="Subtitle paragraph" value={hero.subtitle} onChange={v => setHero(p => ({ ...p, subtitle: v }))} multiline />
               <Field label="Primary button text" value={hero.servicesButton} onChange={v => setHero(p => ({ ...p, servicesButton: v }))} />
-              <Field label="Instagram button text" value={hero.instagramButton} onChange={v => setHero(p => ({ ...p, instagramButton: v }))} />
+              <Field label="Secondary button text (links to Contact)" value={hero.quoteButton} onChange={v => setHero(p => ({ ...p, quoteButton: v }))} />
             </Section>
 
             <div className="admin-section" style={{ marginTop: '1.5rem' }}>
@@ -909,7 +951,7 @@ export default function AdminDashboard() {
               <Field label="Main heading" value={about.heading} onChange={v => setAbout(p => ({ ...p, heading: v }))} />
               <Field label="Paragraph 1" value={about.paragraph1} onChange={v => setAbout(p => ({ ...p, paragraph1: v }))} multiline />
               <Field label="Paragraph 2" value={about.paragraph2} onChange={v => setAbout(p => ({ ...p, paragraph2: v }))} multiline />
-              <Field label="Instagram link text" value={about.followLinkText} onChange={v => setAbout(p => ({ ...p, followLinkText: v }))} />
+              <Field label="Contact link text (links to Contact section)" value={about.followLinkText} onChange={v => setAbout(p => ({ ...p, followLinkText: v }))} />
               <div style={{ marginTop: '0.5rem' }}>
                 <label style={labelStyle}>About Image</label>
                 <input
@@ -1129,6 +1171,110 @@ export default function AdminDashboard() {
                 style={{ width: '100%', padding: '0.85rem', border: '2px dashed #d4af37', background: '#fffdf5', color: '#7a5f06', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
               >
                 + Add Featured Event
+              </button>
+            </Section>
+            </>
+          )}
+
+          {/* PROCESS */}
+          {activeTab === 'Process' && (
+            <>
+            <Section title="How It Works — Section Header" onSave={() => doSave('processSection', processSection)} saving={saving}>
+              <Field label="Section label (small caps above title)" value={processSection.label} onChange={v => setProcessSection(p => ({ ...p, label: v }))} />
+              <div className="admin-grid-2">
+                <Field label="Title — first word(s)" value={processSection.title} onChange={v => setProcessSection(p => ({ ...p, title: v }))} />
+                <Field label="Title — italic accent word" value={processSection.titleAccent} onChange={v => setProcessSection(p => ({ ...p, titleAccent: v }))} />
+              </div>
+            </Section>
+            <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Process Steps" onSave={() => doSave('processSteps', processSteps)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                The 4-step process shown to visitors before the contact form.
+              </p>
+              {processSteps.map((step, i) => (
+                <div key={i} style={{ marginBottom: '1.5rem', padding: '1.25rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
+                  <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af37', marginBottom: '1.25rem', fontWeight: 700 }}>
+                    Step {i + 1}
+                  </p>
+                  <div className="admin-grid-service">
+                    <Field label="Number" value={step.number} onChange={v => setProcessSteps(prev => prev.map((s, j) => j === i ? { ...s, number: v } : s))} />
+                    <Field label="Title" value={step.title} onChange={v => setProcessSteps(prev => prev.map((s, j) => j === i ? { ...s, title: v } : s))} />
+                    <div />
+                  </div>
+                  <Field label="Description" value={step.desc} onChange={v => setProcessSteps(prev => prev.map((s, j) => j === i ? { ...s, desc: v } : s))} multiline />
+                </div>
+              ))}
+            </Section>
+            </>
+          )}
+
+          {/* TESTIMONIALS */}
+          {activeTab === 'Testimonials' && (
+            <>
+            <Section title="Testimonials Section Header" onSave={() => doSave('testimonialsSection', testimonialsSection)} saving={saving}>
+              <Field label="Section label (small caps above title)" value={testimonialsSection.label} onChange={v => setTestimonialsSection(p => ({ ...p, label: v }))} />
+              <div className="admin-grid-2">
+                <Field label="Title — first word(s)" value={testimonialsSection.title} onChange={v => setTestimonialsSection(p => ({ ...p, title: v }))} />
+                <Field label="Title — italic accent word" value={testimonialsSection.titleAccent} onChange={v => setTestimonialsSection(p => ({ ...p, titleAccent: v }))} />
+              </div>
+            </Section>
+            <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Client Testimonials" onSave={() => doSave('testimonials', testimonials)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                Real client quotes build trust. Photo is optional — without one, an initial avatar is shown. Changes apply once you press <strong>Save Changes</strong>.
+              </p>
+              {testimonials.map((t, i) => (
+                <div key={i} style={{ marginBottom: '2rem', padding: '1.25rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af37', margin: 0, fontWeight: 700 }}>
+                      Testimonial {i + 1}
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button type="button" onClick={() => moveTestimonial(i, -1)} disabled={i === 0} title="Move up" style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}>↑</button>
+                      <button type="button" onClick={() => moveTestimonial(i, 1)} disabled={i === testimonials.length - 1} title="Move down" style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === testimonials.length - 1 ? 'not-allowed' : 'pointer', color: i === testimonials.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}>↓</button>
+                      <button type="button" onClick={() => removeTestimonial(i)} title="Remove" style={{ height: '28px', padding: '0 0.7rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>Remove</button>
+                    </div>
+                  </div>
+
+                  {/* Photo */}
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, background: '#f3f4f6', border: '1px solid #e5e7eb', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {t.photoUrl
+                        ? <img src={t.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span style={{ fontSize: '1.25rem', opacity: 0.3 }}>👤</span>}
+                    </div>
+                    <div style={{ flex: 1, minWidth: '160px' }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id={`tm-photo-${i}`}
+                        style={{ display: 'none' }}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadTestimonialPhoto(i, f); e.target.value = '' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById(`tm-photo-${i}`).click()}
+                        disabled={testimonialUploadingIdx === i}
+                        style={{ padding: '0.45rem 0.9rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', border: 'none', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700, cursor: testimonialUploadingIdx === i ? 'wait' : 'pointer', fontFamily: "'Lato', sans-serif" }}
+                      >
+                        {testimonialUploadingIdx === i ? 'Uploading…' : t.photoUrl ? 'Replace photo' : 'Upload photo (optional)'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="admin-grid-2">
+                    <Field label="Client name" value={t.name} onChange={v => setTestimonials(prev => prev.map((p, j) => j === i ? { ...p, name: v } : p))} />
+                    <Field label="Event type" value={t.eventType} onChange={v => setTestimonials(prev => prev.map((p, j) => j === i ? { ...p, eventType: v } : p))} />
+                  </div>
+                  <Field label="Quote" value={t.quote} onChange={v => setTestimonials(prev => prev.map((p, j) => j === i ? { ...p, quote: v } : p))} multiline />
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addTestimonial}
+                style={{ width: '100%', padding: '0.85rem', border: '2px dashed #d4af37', background: '#fffdf5', color: '#7a5f06', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+              >
+                + Add Testimonial
               </button>
             </Section>
             </>

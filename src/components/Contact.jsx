@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FiInstagram, FiMail, FiPhone, FiSend, FiMapPin } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
+import { darken } from '../lib/color'
+import { getWhatsAppLink } from '../lib/whatsapp'
 
 const eventTypes = [
   'Wedding', 'Birthday', 'Corporate Event', 'Religious Ceremony', 'Engagement', 'Other'
@@ -13,13 +15,32 @@ export default function Contact() {
   const { colors, contactInfo, contactSection } = config
   const dt = colors.darkText || '#5c4604'
   const lt = colors.lightText || '#f7ecd0'
+  const eyebrow = darken(colors.gold, 35)
 
-  const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', message: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', message: '', company: '' })
   const [status, setStatus] = useState('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const [touched, setTouched] = useState({})
+  const resultRef = useRef(null)
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+
+  const handleBlur = (e) =>
+    setTouched((prev) => ({ ...prev, [e.target.name]: true }))
+
+  function validate(values) {
+    const errs = {}
+    if (!values.name.trim()) errs.name = 'Please enter your name.'
+    if (!values.email.trim()) errs.email = 'Please enter your email.'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) errs.email = 'Enter a valid email address.'
+    if (values.phone && !/^[+\d\s-]{7,15}$/.test(values.phone)) errs.phone = 'Enter a valid phone number.'
+    if (!values.message.trim()) errs.message = 'Tell us a little about your event.'
+    else if (values.message.trim().length < 10) errs.message = 'Please add a few more details.'
+    return errs
+  }
+
+  const errors = validate(form)
 
   // Pre-fill from a Portfolio "Plan an event like this" click
   useEffect(() => {
@@ -43,11 +64,11 @@ export default function Contact() {
     return () => window.removeEventListener('prefill-contact', handler)
   }, [])
 
-  const sendEmails = () =>
+  const sendEmails = (payload) =>
     fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     })
       .then((r) => r.json())
       .then((d) => { if (!d.success) console.warn('Email send failed:', d.error) })
@@ -55,10 +76,23 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setTouched({ name: true, email: true, phone: true, message: true })
+
+    const validationErrors = validate(form)
+    if (Object.keys(validationErrors).length > 0) return
+
+    // Honeypot: real visitors never fill this hidden field. If it's filled,
+    // silently pretend success without writing to the database.
+    if (form.company) {
+      setStatus('success')
+      return
+    }
+
     setStatus('loading')
     setErrorMsg('')
 
-    const { error: dbError } = await supabase.from('contacts').insert([form])
+    const payload = { name: form.name, email: form.email, phone: form.phone, event_type: form.event_type, message: form.message }
+    const { error: dbError } = await supabase.from('contacts').insert([payload])
     if (dbError) {
       setErrorMsg(dbError.message)
       setStatus('error')
@@ -66,8 +100,12 @@ export default function Contact() {
     }
 
     setStatus('success')
-    sendEmails()
+    sendEmails(payload)
   }
+
+  useEffect(() => {
+    if (status === 'success') resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [status])
 
   const contactItems = [
     { icon: <FiInstagram />, label: 'Instagram', value: contactInfo.instagramHandle, href: contactInfo.instagramUrl },
@@ -76,11 +114,7 @@ export default function Contact() {
     { icon: <FiMapPin />, label: 'Location', value: contactInfo.address, href: '#' },
   ]
 
-  // WhatsApp deep link — pre-fills an inquiry message. Uses the configured
-  // whatsapp number if set, otherwise falls back to the contact phone.
-  const waNumber = (contactInfo.whatsapp || contactInfo.phone || '').replace(/\D/g, '')
-  const waMessage = `Hi shubhasparshanepal! I'd like to inquire about your event planning services.`
-  const waLink = `https://wa.me/977${waNumber}?text=${encodeURIComponent(waMessage)}`
+  const waLink = getWhatsAppLink(contactInfo)
 
   return (
     <section id="contact" className="py-16 md:py-28" style={{ background: colors.cream }}>
@@ -89,7 +123,7 @@ export default function Contact() {
         <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
-            style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
+            style={{ color: eyebrow, fontFamily: "'Lato', sans-serif", fontWeight: 700 }}
           >
             {contactSection.label}
           </p>
@@ -174,6 +208,7 @@ export default function Contact() {
           <div className="md:col-span-3">
             {status === 'success' ? (
               <div
+                ref={resultRef}
                 className="h-full flex flex-col items-center justify-center text-center p-8 md:p-16 border"
                 style={{ borderColor: colors.gold }}
               >
@@ -189,7 +224,19 @@ export default function Contact() {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                {/* Honeypot — hidden from real visitors, bots often fill every field */}
+                <input
+                  type="text"
+                  name="company"
+                  value={form.company}
+                  onChange={handleChange}
+                  autoComplete="off"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
+                />
+
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <label
@@ -201,13 +248,17 @@ export default function Contact() {
                     <input
                       type="text"
                       name="name"
-                      required
                       value={form.name}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       placeholder="Your name"
+                      aria-invalid={touched.name && !!errors.name}
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${touched.name && errors.name ? '#dc2626' : colors.gold + '66'}`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                     />
+                    {touched.name && errors.name && (
+                      <p className="text-xs mt-1.5" style={{ color: '#dc2626', fontFamily: "'Lato', sans-serif" }}>{errors.name}</p>
+                    )}
                   </div>
                   <div>
                     <label
@@ -219,13 +270,17 @@ export default function Contact() {
                     <input
                       type="email"
                       name="email"
-                      required
                       value={form.email}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       placeholder="your@email.com"
+                      aria-invalid={touched.email && !!errors.email}
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${touched.email && errors.email ? '#dc2626' : colors.gold + '66'}`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                     />
+                    {touched.email && errors.email && (
+                      <p className="text-xs mt-1.5" style={{ color: '#dc2626', fontFamily: "'Lato', sans-serif" }}>{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -242,10 +297,15 @@ export default function Contact() {
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       placeholder="+977 XXXXXXXXXX"
+                      aria-invalid={touched.phone && !!errors.phone}
                       className="w-full px-4 py-3 bg-transparent focus:outline-none"
-                      style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
+                      style={{ borderBottom: `2px solid ${touched.phone && errors.phone ? '#dc2626' : colors.gold + '66'}`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                     />
+                    {touched.phone && errors.phone && (
+                      <p className="text-xs mt-1.5" style={{ color: '#dc2626', fontFamily: "'Lato', sans-serif" }}>{errors.phone}</p>
+                    )}
                   </div>
                   <div>
                     <label
@@ -276,14 +336,18 @@ export default function Contact() {
                   </label>
                   <textarea
                     name="message"
-                    required
                     rows={5}
                     value={form.message}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="Share your vision, preferred dates, approximate guest count…"
+                    aria-invalid={touched.message && !!errors.message}
                     className="w-full px-4 py-3 bg-transparent focus:outline-none resize-none"
-                    style={{ borderBottom: `2px solid ${colors.gold}66`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
+                    style={{ borderBottom: `2px solid ${touched.message && errors.message ? '#dc2626' : colors.gold + '66'}`, color: colors.maroon, fontFamily: "'Lato', sans-serif" }}
                   />
+                  {touched.message && errors.message && (
+                    <p className="text-xs mt-1.5" style={{ color: '#dc2626', fontFamily: "'Lato', sans-serif" }}>{errors.message}</p>
+                  )}
                 </div>
 
                 {status === 'error' && (
