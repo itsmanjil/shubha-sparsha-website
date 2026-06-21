@@ -6,13 +6,9 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 import { darken } from '../lib/color'
 import { getWhatsAppLink } from '../lib/whatsapp'
 
-const eventTypes = [
-  'Wedding', 'Birthday', 'Corporate Event', 'Religious Ceremony', 'Engagement', 'Other'
-]
-
 export default function Contact() {
   const { config } = useSiteConfig()
-  const { colors, contactInfo, contactSection } = config
+  const { colors, contactInfo, contactSection, eventTypes = [] } = config
   const dt = colors.darkText || '#5c4604'
   const lt = colors.lightText || '#f7ecd0'
   const eyebrow = darken(colors.gold, 35)
@@ -53,7 +49,7 @@ export default function Contact() {
             (t.toLowerCase() === type.toLowerCase() ||
               t.toLowerCase().includes(type.toLowerCase()) ||
               type.toLowerCase().includes(t.toLowerCase()))
-        ) || 'Other'
+        ) || ''
       setForm((prev) => ({
         ...prev,
         event_type: matched,
@@ -62,7 +58,7 @@ export default function Contact() {
     }
     window.addEventListener('prefill-contact', handler)
     return () => window.removeEventListener('prefill-contact', handler)
-  }, [])
+  }, [eventTypes])
 
   const sendEmails = (payload) =>
     fetch('/api/send-email', {

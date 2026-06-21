@@ -4,19 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-const NAV_LINKS = [
-  { label: 'Home', to: 'hero' },
-  { label: 'About', to: 'about' },
-  { label: 'Services', to: 'services' },
-  { label: 'Portfolio', to: 'portfolio' },
-  { label: 'Gallery', to: 'gallery' },
-  { label: 'Contact', to: 'contact' },
-]
-
 export default function Navbar() {
   const navigate = useNavigate()
   const { config } = useSiteConfig()
-  const { colors, navbar } = config
+  const { colors, navbar, navLinks = [] } = config
   const lt = colors.lightText || '#f7ecd0'
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -69,10 +60,10 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <ul className="hidden lg:flex gap-8 items-center">
-          {NAV_LINKS.map((link) => (
-            <li key={link.to}>
+          {navLinks.map((link) => (
+            <li key={link.id}>
               <Link
-                to={link.to}
+                to={link.id}
                 smooth
                 duration={600}
                 offset={-80}
@@ -121,10 +112,10 @@ export default function Navbar() {
           style={{ background: `${colors.maroon500}f5`, borderTop: `1px solid ${colors.gold}33` }}
         >
           <ul className="flex flex-col gap-5">
-            {NAV_LINKS.map((link) => (
-              <li key={link.to}>
+            {navLinks.map((link) => (
+              <li key={link.id}>
                 <Link
-                  to={link.to}
+                  to={link.id}
                   smooth
                   duration={600}
                   offset={-80}

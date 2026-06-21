@@ -6,6 +6,19 @@ import { compressImage } from '../lib/compressImage'
 
 const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Process', 'Testimonials', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 
+// Valid on-page section anchors a nav link can point to — keep in sync with
+// the `id` attribute on each <section> in App.jsx's homepage.
+const SECTION_OPTIONS = [
+  { id: 'hero', name: 'Home (Hero)' },
+  { id: 'about', name: 'About' },
+  { id: 'services', name: 'Services' },
+  { id: 'portfolio', name: 'Portfolio' },
+  { id: 'gallery', name: 'Gallery' },
+  { id: 'testimonials', name: 'Testimonials' },
+  { id: 'process', name: 'How It Works' },
+  { id: 'contact', name: 'Contact' },
+]
+
 const ADMIN_CSS = `
   @keyframes spin { to { transform: rotate(360deg) } }
   .admin-layout { display: flex; min-height: calc(100vh - 56px); }
@@ -174,6 +187,7 @@ export default function AdminDashboard() {
 
   const [colors, setColors] = useState({ ...config.colors })
   const [navbar, setNavbar] = useState({ ...config.navbar })
+  const [navLinks, setNavLinks] = useState((config.navLinks || []).map(l => ({ ...l })))
   const [hero, setHero] = useState({ ...config.hero })
   const [about, setAbout] = useState({ ...config.about })
   const [stats, setStats] = useState(config.stats.map(s => ({ ...s })))
@@ -194,6 +208,8 @@ export default function AdminDashboard() {
   const [newCategory, setNewCategory] = useState('')
   const [contactSection, setContactSection] = useState({ ...config.contactSection })
   const [contactInfo, setContactInfo] = useState({ ...config.contactInfo })
+  const [eventTypes, setEventTypes] = useState([...(config.eventTypes || [])])
+  const [newEventType, setNewEventType] = useState('')
   const [footer, setFooter] = useState({ ...config.footer })
 
   async function doSave(key, value) {
@@ -392,6 +408,54 @@ export default function AdminDashboard() {
     doSave('galleryCategories', updated)
   }
 
+  function addNavLink() {
+    setNavLinks(prev => [...prev, { id: 'about', label: 'New Link' }])
+  }
+
+  function removeNavLink(i) {
+    if (!confirm('Remove this menu link?')) return
+    setNavLinks(prev => prev.filter((_, j) => j !== i))
+  }
+
+  function moveNavLink(i, dir) {
+    setNavLinks(prev => {
+      const target = i + dir
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[i], next[target]] = [next[target], next[i]]
+      return next
+    })
+  }
+
+  function addEventType() {
+    const name = newEventType.trim()
+    if (!name) return
+    if (eventTypes.some(t => t.toLowerCase() === name.toLowerCase())) {
+      setSavedMsg('Error: that event type already exists')
+      return
+    }
+    const updated = [...eventTypes, name]
+    setEventTypes(updated)
+    setNewEventType('')
+    doSave('eventTypes', updated)
+  }
+
+  function removeEventType(name) {
+    if (!confirm(`Remove "${name}" from the contact form's event type list?`)) return
+    const updated = eventTypes.filter(t => t !== name)
+    setEventTypes(updated)
+    doSave('eventTypes', updated)
+  }
+
+  function moveEventType(i, dir) {
+    const target = i + dir
+    if (target < 0 || target >= eventTypes.length) return
+    const updated = [...eventTypes]
+    ;[updated[i], updated[target]] = [updated[target], updated[i]]
+    setEventTypes(updated)
+    doSave('eventTypes', updated)
+  }
+
   async function uploadGalleryPhoto() {
     if (!newPhoto.file) return
     setGalleryUploading(true)
@@ -435,6 +499,25 @@ export default function AdminDashboard() {
         : s.tags,
     }))
     doSave('services', parsed)
+  }
+
+  function addStat() {
+    setStats(prev => [...prev, { value: '0+', label: 'New Stat' }])
+  }
+
+  function removeStat(i) {
+    if (!confirm('Remove this stat card?')) return
+    setStats(prev => prev.filter((_, j) => j !== i))
+  }
+
+  function moveStat(i, dir) {
+    setStats(prev => {
+      const target = i + dir
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[i], next[target]] = [next[target], next[i]]
+      return next
+    })
   }
 
   function addService() {
@@ -783,6 +866,47 @@ export default function AdminDashboard() {
               <Field label="Browser tab title" value={navbar.pageTitle} onChange={v => setNavbar(p => ({ ...p, pageTitle: v }))} />
             </Section>
 
+            {/* Menu links */}
+            <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Menu Links" onSave={() => doSave('navLinks', navLinks)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                Controls both the top navbar and the footer's "Quick Links" — they always stay in sync. Each link scrolls to a section on the page. Press <strong>Save Changes</strong> to apply.
+              </p>
+              {navLinks.map((link, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyle}>Label</label>
+                    <input
+                      type="text"
+                      value={link.label}
+                      onChange={e => setNavLinks(prev => prev.map((l, j) => j === i ? { ...l, label: e.target.value } : l))}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyle}>Links to</label>
+                    <select
+                      value={link.id}
+                      onChange={e => setNavLinks(prev => prev.map((l, j) => j === i ? { ...l, id: e.target.value } : l))}
+                      style={inputStyle}
+                    >
+                      {SECTION_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  </div>
+                  <button type="button" onClick={() => moveNavLink(i, -1)} disabled={i === 0} title="Move up" style={{ width: '2.625rem', height: '2.625rem', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.85rem', flexShrink: 0 }}>↑</button>
+                  <button type="button" onClick={() => moveNavLink(i, 1)} disabled={i === navLinks.length - 1} title="Move down" style={{ width: '2.625rem', height: '2.625rem', border: '1px solid #e5e7eb', background: 'white', cursor: i === navLinks.length - 1 ? 'not-allowed' : 'pointer', color: i === navLinks.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.85rem', flexShrink: 0 }}>↓</button>
+                  <button type="button" onClick={() => removeNavLink(i)} title="Remove" style={{ height: '2.625rem', padding: '0 0.85rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700, flexShrink: 0 }}>Remove</button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addNavLink}
+                style={{ width: '100%', padding: '0.75rem', border: '2px dashed #d4af37', background: '#fffdf5', color: '#7a5f06', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif", marginTop: '0.5rem' }}
+              >
+                + Add Menu Link
+              </button>
+            </Section>
+
             {/* Logo upload */}
             <div className="admin-section" style={{ marginTop: '1.5rem' }}>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2a0000', marginTop: 0, marginBottom: '0.5rem', paddingBottom: '1rem', borderBottom: '2px solid #f3f4f6' }}>
@@ -1049,20 +1173,42 @@ export default function AdminDashboard() {
           {/* STATS */}
           {activeTab === 'Stats' && (
             <Section title="Statistics" onSave={() => doSave('stats', stats)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                The stat cards shown on the homepage (e.g. "200+ Events Planned"). Add, remove, or reorder. Changes apply once you press <strong>Save Changes</strong>.
+              </p>
               {stats.map((stat, i) => (
-                <div key={i} className="admin-grid-stat">
-                  <Field
-                    label={`Stat ${i + 1} — value`}
-                    value={stat.value}
-                    onChange={v => setStats(prev => prev.map((s, j) => j === i ? { ...s, value: v } : s))}
-                  />
-                  <Field
-                    label="label"
-                    value={stat.label}
-                    onChange={v => setStats(prev => prev.map((s, j) => j === i ? { ...s, label: v } : s))}
-                  />
+                <div key={i} style={{ marginBottom: '1.25rem', padding: '1rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#d4af37', margin: 0, fontWeight: 700 }}>
+                      Stat {i + 1}
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button type="button" onClick={() => moveStat(i, -1)} disabled={i === 0} title="Move up" style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}>↑</button>
+                      <button type="button" onClick={() => moveStat(i, 1)} disabled={i === stats.length - 1} title="Move down" style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb', background: 'white', cursor: i === stats.length - 1 ? 'not-allowed' : 'pointer', color: i === stats.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.8rem' }}>↓</button>
+                      <button type="button" onClick={() => removeStat(i)} title="Remove" style={{ height: '28px', padding: '0 0.7rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>Remove</button>
+                    </div>
+                  </div>
+                  <div className="admin-grid-stat">
+                    <Field
+                      label="Value"
+                      value={stat.value}
+                      onChange={v => setStats(prev => prev.map((s, j) => j === i ? { ...s, value: v } : s))}
+                    />
+                    <Field
+                      label="Label"
+                      value={stat.label}
+                      onChange={v => setStats(prev => prev.map((s, j) => j === i ? { ...s, label: v } : s))}
+                    />
+                  </div>
                 </div>
               ))}
+              <button
+                type="button"
+                onClick={addStat}
+                style={{ width: '100%', padding: '0.85rem', border: '2px dashed #d4af37', background: '#fffdf5', color: '#7a5f06', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif" }}
+              >
+                + Add Stat
+              </button>
             </Section>
           )}
 
@@ -1389,6 +1535,49 @@ export default function AdminDashboard() {
               <Field label="Instagram handle (e.g. @shubhasparshanp)" value={contactInfo.instagramHandle} onChange={v => setContactInfo(p => ({ ...p, instagramHandle: v }))} />
               <Field label="Instagram URL" value={contactInfo.instagramUrl} onChange={v => setContactInfo(p => ({ ...p, instagramUrl: v }))} />
             </Section>
+
+            <div style={{ marginTop: '1.5rem' }} />
+            <div className="admin-section">
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: '#2a0000', marginTop: 0, marginBottom: '0.5rem', paddingBottom: '1rem', borderBottom: '2px solid #f3f4f6' }}>
+                Event Types
+              </h2>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.5rem', fontFamily: "'Lato', sans-serif", lineHeight: 1.6 }}>
+                The dropdown options visitors choose from on the contact form. Add, remove, or reorder — changes save immediately.
+              </p>
+
+              {eventTypes.length === 0 ? (
+                <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: '1.25rem' }}>No event types yet — add one below.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                  {eventTypes.map((type, i) => (
+                    <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.85rem', background: '#fafafa', border: '1px solid #e5e7eb' }}>
+                      <span style={{ flex: 1, fontSize: '0.85rem', color: '#1f2937', fontFamily: "'Lato', sans-serif", fontWeight: 600 }}>{type}</span>
+                      <button type="button" onClick={() => moveEventType(i, -1)} disabled={i === 0} title="Move up" style={{ width: '26px', height: '26px', border: '1px solid #e5e7eb', background: 'white', cursor: i === 0 ? 'not-allowed' : 'pointer', color: i === 0 ? '#d1d5db' : '#6b7280', fontSize: '0.75rem' }}>↑</button>
+                      <button type="button" onClick={() => moveEventType(i, 1)} disabled={i === eventTypes.length - 1} title="Move down" style={{ width: '26px', height: '26px', border: '1px solid #e5e7eb', background: 'white', cursor: i === eventTypes.length - 1 ? 'not-allowed' : 'pointer', color: i === eventTypes.length - 1 ? '#d1d5db' : '#6b7280', fontSize: '0.75rem' }}>↓</button>
+                      <button type="button" onClick={() => removeEventType(type)} title="Remove" style={{ height: '26px', padding: '0 0.6rem', border: '1px solid #fca5a5', background: 'white', cursor: 'pointer', color: '#ef4444', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  value={newEventType}
+                  onChange={e => setNewEventType(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addEventType() } }}
+                  placeholder="e.g. Naming Ceremony"
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={addEventType}
+                  style={{ padding: '0 1.25rem', background: 'linear-gradient(135deg, #d4af37, #b8960c)', color: '#2a0000', border: 'none', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', fontFamily: "'Lato', sans-serif", whiteSpace: 'nowrap' }}
+                >
+                  + Add
+                </button>
+              </div>
+            </div>
             </>
           )}
 

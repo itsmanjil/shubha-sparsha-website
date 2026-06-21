@@ -2,17 +2,9 @@ import { Link } from 'react-scroll'
 import { FiInstagram, FiMail } from 'react-icons/fi'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-const navLinks = [
-  { id: 'hero', label: 'Home' },
-  { id: 'about', label: 'About' },
-  { id: 'services', label: 'Services' },
-  { id: 'gallery', label: 'Portfolio' },
-  { id: 'contact', label: 'Contact' },
-]
-
 export default function Footer() {
   const { config } = useSiteConfig()
-  const { colors, footer, contactInfo } = config
+  const { colors, footer, contactInfo, navLinks = [] } = config
   const lt = colors.lightText || '#f7ecd0'
 
   return (

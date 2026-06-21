@@ -101,9 +101,9 @@ export default function About() {
           className="grid grid-cols-2 md:grid-cols-4 gap-px"
           style={{ background: colors.gold }}
         >
-          {stats.map((s) => (
+          {stats.map((s, i) => (
             <div
-              key={s.label}
+              key={i}
               className="text-center py-8 px-3 md:py-10 md:px-6"
               style={{ background: colors.maroon }}
             >
