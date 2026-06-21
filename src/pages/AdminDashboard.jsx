@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
+import { compressImage } from '../lib/compressImage'
 
 const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 const GALLERY_CATEGORIES = ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies']
@@ -233,9 +234,10 @@ export default function AdminDashboard() {
   async function uploadHeroSlide(file) {
     setHeroSlideUploading(true)
     try {
-      const ext = file.name.split('.').pop()
+      const compressed = await compressImage(file, { maxDim: 2000 })
+      const ext = compressed.name.split('.').pop()
       const path = `hero/${Date.now()}.${ext}`
-      const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, file)
+      const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, compressed)
       if (uploadErr) throw uploadErr
       const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
       const updated = [...heroSlides, publicUrl]
@@ -264,9 +266,10 @@ export default function AdminDashboard() {
   async function uploadAboutImage(file) {
     setUploadingImage(true)
     try {
-      const ext = file.name.split('.').pop()
+      const compressed = await compressImage(file)
+      const ext = compressed.name.split('.').pop()
       const path = `about-image.${ext}`
-      const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, file, { upsert: true })
+      const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, compressed, { upsert: true })
       if (uploadErr) throw uploadErr
       const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
       const updated = { ...about, imageUrl: publicUrl }
@@ -355,9 +358,10 @@ export default function AdminDashboard() {
     if (!newPhoto.file) return
     setGalleryUploading(true)
     try {
-      const ext = newPhoto.file.name.split('.').pop()
+      const file = await compressImage(newPhoto.file)
+      const ext = file.name.split('.').pop()
       const path = `gallery/${Date.now()}.${ext}`
-      const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, newPhoto.file)
+      const { error: uploadErr } = await supabase.storage.from('site-images').upload(path, file)
       if (uploadErr) throw uploadErr
       const { data: { publicUrl } } = supabase.storage.from('site-images').getPublicUrl(path)
       const { error: dbErr } = await supabase.from('gallery').insert([{
