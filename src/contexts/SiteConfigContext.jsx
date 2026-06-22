@@ -3,11 +3,15 @@ import { supabase } from '../lib/supabase'
 
 export const defaultConfig = {
   colors: {
-    maroon: '#2a0000',
-    maroon500: '#800000',
+    // maroon and lightText are pixel-sampled from the uploaded logo
+    // (logo/logo.png) so the navbar/footer background and lettering match
+    // it exactly. maroon500 is the same hue scaled brighter, not just
+    // lightened, so gradients/accents stay in the same warm family.
+    maroon: '#540C0D',
+    maroon500: '#B91A1D',
     gold: '#d4af37',
     cream: '#fffdf5',
-    lightText: '#f7ecd0',
+    lightText: '#F9EFD6',
     darkText: '#5c4604',
   },
   navbar: {
