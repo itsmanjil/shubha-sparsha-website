@@ -1477,7 +1477,7 @@ export default function AdminDashboard() {
                 <Field label="Title — first word(s)" value={gallerySection.title} onChange={v => setGallerySection(p => ({ ...p, title: v }))} />
                 <Field label="Title — italic accent word" value={gallerySection.titleAccent} onChange={v => setGallerySection(p => ({ ...p, titleAccent: v }))} />
               </div>
-              <Field label="Instagram button text" value={gallerySection.instagramButton} onChange={v => setGallerySection(p => ({ ...p, instagramButton: v }))} />
+              <Field label="Intro subtitle (below the title)" value={gallerySection.subtitle} onChange={v => setGallerySection(p => ({ ...p, subtitle: v }))} multiline />
               <div>
                 <label style={labelStyle}>Photos shown per page</label>
                 <input
@@ -1492,6 +1492,45 @@ export default function AdminDashboard() {
                   How many photos appear before visitors need to click "Show More" — applies per category.
                 </p>
               </div>
+            </Section>
+
+            <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Instagram Link" onSave={() => doSave('gallerySection', gallerySection)} saving={saving}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', marginBottom: '1.25rem' }}>
+                <input
+                  type="checkbox"
+                  checked={gallerySection.instagramEnabled !== false}
+                  onChange={e => setGallerySection(p => ({ ...p, instagramEnabled: e.target.checked }))}
+                  style={{ width: '1.1rem', height: '1.1rem', accentColor: '#d4af37', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '0.85rem', color: '#374151', fontFamily: "'Lato', sans-serif" }}>Show the Instagram button on the gallery</span>
+              </label>
+              {gallerySection.instagramEnabled !== false && (
+                <Field label="Instagram button text" value={gallerySection.instagramButton} onChange={v => setGallerySection(p => ({ ...p, instagramButton: v }))} />
+              )}
+            </Section>
+
+            <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Call-to-Action Band" onSave={() => doSave('gallerySection', gallerySection)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                A prompt shown at the bottom of the gallery encouraging visitors to enquire. The button takes them to the contact form.
+              </p>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', marginBottom: '1.25rem' }}>
+                <input
+                  type="checkbox"
+                  checked={gallerySection.ctaEnabled !== false}
+                  onChange={e => setGallerySection(p => ({ ...p, ctaEnabled: e.target.checked }))}
+                  style={{ width: '1.1rem', height: '1.1rem', accentColor: '#d4af37', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '0.85rem', color: '#374151', fontFamily: "'Lato', sans-serif" }}>Show the call-to-action band</span>
+              </label>
+              {gallerySection.ctaEnabled !== false && (
+                <>
+                  <Field label="Heading" value={gallerySection.ctaHeading} onChange={v => setGallerySection(p => ({ ...p, ctaHeading: v }))} />
+                  <Field label="Supporting text" value={gallerySection.ctaText} onChange={v => setGallerySection(p => ({ ...p, ctaText: v }))} multiline />
+                  <Field label="Button text" value={gallerySection.ctaButton} onChange={v => setGallerySection(p => ({ ...p, ctaButton: v }))} />
+                </>
+              )}
             </Section>
 
             <div style={{ marginTop: '1.5rem' }} />

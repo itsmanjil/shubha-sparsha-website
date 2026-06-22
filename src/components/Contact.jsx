@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { FiInstagram, FiMail, FiPhone, FiSend, FiMapPin } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
@@ -38,10 +39,15 @@ export default function Contact() {
 
   const errors = validate(form)
 
-  // Pre-fill from a Portfolio "Plan an event like this" click
+  const location = useLocation()
+
+  // Pre-fill from a Portfolio/Gallery "Plan an event like this" click.
+  // Same-page clicks fire a window event; cross-page clicks (from the
+  // standalone /gallery) arrive via router navigation state.
   useEffect(() => {
-    const handler = (e) => {
-      const { type, name } = e.detail || {}
+    const applyPrefill = (detail) => {
+      const { type, name } = detail || {}
+      if (!type && !name) return
       const matched =
         eventTypes.find(
           (t) =>
@@ -56,9 +62,14 @@ export default function Contact() {
         message: prev.message || `I'd love to plan an event like "${name}". Please share how we can begin.`,
       }))
     }
+
+    const handler = (e) => applyPrefill(e.detail)
     window.addEventListener('prefill-contact', handler)
+
+    if (location.state?.prefill) applyPrefill(location.state.prefill)
+
     return () => window.removeEventListener('prefill-contact', handler)
-  }, [eventTypes])
+  }, [eventTypes, location.state])
 
   const sendEmails = (payload) =>
     fetch('/api/send-email', {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FiInstagram, FiImage, FiMail } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
@@ -31,6 +32,7 @@ const GALLERY_CSS = `
 `
 
 export default function Gallery({ standalone = false }) {
+  const navigate = useNavigate()
   const { config } = useSiteConfig()
   const { colors, contactInfo, gallerySection, galleryCategories = [] } = config
   const categories = ['All', ...galleryCategories]
@@ -73,9 +75,22 @@ export default function Gallery({ standalone = false }) {
   const hasMore = filtered.length > visibleCount
   const placeholderCount = Math.max(0, 6 - visible.length)
 
+  // Sends the visitor to the contact form, optionally pre-filling it. When the
+  // contact section is on the current page (gallery embedded in the homepage),
+  // scroll to it; on the standalone /gallery page it isn't mounted, so navigate
+  // home and pass the prefill through router state for Contact to pick up.
+  function goToContact(detail) {
+    const el = document.getElementById('contact')
+    if (el) {
+      if (detail) window.dispatchEvent(new CustomEvent('prefill-contact', { detail }))
+      el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      navigate('/', { state: { scrollTo: 'contact', prefill: detail || null } })
+    }
+  }
+
   function planLikeThis(img) {
-    window.dispatchEvent(new CustomEvent('prefill-contact', { detail: { type: img.category, name: img.title || img.category } }))
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+    goToContact({ type: img.category, name: img.title || img.category })
   }
 
   return (
@@ -99,11 +114,20 @@ export default function Gallery({ standalone = false }) {
           >
             {gallerySection.title} <em style={{ color: colors.gold }}>{gallerySection.titleAccent}</em>
           </h2>
-          <div className="flex items-center justify-center gap-4 mb-10">
+          <div className="flex items-center justify-center gap-4 mb-8">
             <div className="h-px w-16" style={{ background: colors.gold }} />
             <span style={{ color: colors.gold }}>✦</span>
             <div className="h-px w-16" style={{ background: colors.gold }} />
           </div>
+
+          {gallerySection.subtitle && (
+            <p
+              className="max-w-2xl mx-auto text-base md:text-lg mb-10"
+              style={{ color: `${lt}cc`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+            >
+              {gallerySection.subtitle}
+            </p>
+          )}
 
           {/* Category filter */}
           <div className="flex flex-wrap justify-center gap-3">
@@ -197,23 +221,59 @@ export default function Gallery({ standalone = false }) {
           </div>
         )}
 
-        {/* CTA */}
-        <div className="text-center">
-          <a
-            href={contactInfo.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border transition-all duration-300 hover:gap-5"
-            style={{
-              borderColor: colors.gold,
-              color: colors.gold,
-              fontFamily: "'Lato', sans-serif",
-            }}
+        {/* Instagram link */}
+        {gallerySection.instagramEnabled !== false && (
+          <div className="text-center">
+            <a
+              href={contactInfo.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border transition-all duration-300 hover:gap-5"
+              style={{
+                borderColor: colors.gold,
+                color: colors.gold,
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              <FiInstagram />
+              {gallerySection.instagramButton}
+            </a>
+          </div>
+        )}
+
+        {/* Conversion CTA band */}
+        {gallerySection.ctaEnabled !== false && (
+          <div
+            className="mt-16 md:mt-20 text-center px-6 py-12 md:py-16"
+            style={{ border: `1px solid ${colors.gold}40`, background: `${colors.gold}0d` }}
           >
-            <FiInstagram />
-            {gallerySection.instagramButton}
-          </a>
-        </div>
+            <h3
+              className="text-2xl md:text-3xl font-bold mb-3"
+              style={{ fontFamily: "'Playfair Display', serif", color: lt }}
+            >
+              {gallerySection.ctaHeading}
+            </h3>
+            <p
+              className="max-w-xl mx-auto mb-8"
+              style={{ color: `${lt}b3`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+            >
+              {gallerySection.ctaText}
+            </p>
+            <button
+              type="button"
+              onClick={() => goToContact()}
+              className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5"
+              style={{
+                background: `linear-gradient(135deg, ${colors.gold}, #b8960c)`,
+                color: colors.maroon,
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              <FiMail />
+              {gallerySection.ctaButton}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )

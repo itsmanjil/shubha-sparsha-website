@@ -106,8 +106,14 @@ export const defaultConfig = {
     label: 'Our Work',
     title: 'Event',
     titleAccent: 'Portfolio',
+    subtitle: 'A glimpse of the celebrations we have brought to life — from intimate ceremonies to grand receptions.',
     instagramButton: 'View Full Portfolio on Instagram',
+    instagramEnabled: true,
     pageSize: 12,
+    ctaEnabled: true,
+    ctaHeading: 'Inspired by what you see?',
+    ctaText: "Let's create something just as beautiful for your celebration.",
+    ctaButton: 'Start Planning',
   },
   galleryCategories: ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies'],
   contactInfo: {
@@ -145,7 +151,18 @@ export function SiteConfigProvider({ children }) {
       if (!data?.length) return
       const merged = { ...defaultConfig }
       for (const row of data) {
-        if (row.key in merged) merged[row.key] = row.value
+        if (!(row.key in merged)) continue
+        const def = merged[row.key]
+        // For plain object config (gallerySection, navbar, etc.) shallow-merge
+        // the stored value over the default so newly-added default keys still
+        // appear even when an older stored row predates them. Arrays and
+        // primitives are replaced wholesale.
+        if (def && typeof def === 'object' && !Array.isArray(def) &&
+            row.value && typeof row.value === 'object' && !Array.isArray(row.value)) {
+          merged[row.key] = { ...def, ...row.value }
+        } else {
+          merged[row.key] = row.value
+        }
       }
       setConfig(merged)
     })
