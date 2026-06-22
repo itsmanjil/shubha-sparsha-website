@@ -8,6 +8,8 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 const TILE_PATTERN = ['big', 'sm', 'sm', 'tall', 'sm', 'wide', 'sm', 'tall', 'sm', 'sm', 'wide', 'big', 'sm', 'sm']
 const tileClass = (i) => `g-${TILE_PATTERN[i % TILE_PATTERN.length]}`
 
+const PAGE_SIZE = 12
+
 const GALLERY_CSS = `
   .g-masonry {
     display: grid;
@@ -35,6 +37,8 @@ export default function Gallery() {
   const lt = colors.lightText || '#f7ecd0'
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [lastFilter, setLastFilter] = useState(filter)
 
   useEffect(() => {
     fetchImages()
@@ -47,6 +51,14 @@ export default function Gallery() {
     return () => supabase.removeChannel(channel)
   }, [])
 
+  // Reset to the first page whenever the category filter changes — adjusted
+  // during render (React's recommended pattern) rather than in an effect,
+  // so it doesn't cause an extra render pass.
+  if (filter !== lastFilter) {
+    setLastFilter(filter)
+    setVisibleCount(PAGE_SIZE)
+  }
+
   async function fetchImages() {
     const { data, error } = await supabase
       .from('gallery')
@@ -56,7 +68,9 @@ export default function Gallery() {
   }
 
   const filtered = filter === 'All' ? images : images.filter((img) => img.category === filter)
-  const placeholderCount = Math.max(0, 6 - filtered.length)
+  const visible = filtered.slice(0, visibleCount)
+  const hasMore = filtered.length > visibleCount
+  const placeholderCount = Math.max(0, 6 - visible.length)
 
   function planLikeThis(img) {
     window.dispatchEvent(new CustomEvent('prefill-contact', { detail: { type: img.category, name: img.title || img.category } }))
@@ -110,7 +124,7 @@ export default function Gallery() {
         {/* Masonry mosaic */}
         <style>{GALLERY_CSS}</style>
         <div className="g-masonry mb-12">
-          {filtered.map((img, i) => (
+          {visible.map((img, i) => (
             <button
               key={img.id}
               type="button"
@@ -152,13 +166,31 @@ export default function Gallery() {
           {Array.from({ length: placeholderCount }).map((_, i) => (
             <div
               key={`ph-${i}`}
-              className={`g-tile flex items-center justify-center ${tileClass(filtered.length + i)}`}
+              className={`g-tile flex items-center justify-center ${tileClass(visible.length + i)}`}
               style={{ background: `${colors.maroon500}66` }}
             >
               <FiImage className="text-4xl opacity-20" style={{ color: colors.gold }} />
             </div>
           ))}
         </div>
+
+        {/* Show more */}
+        {hasMore && (
+          <div className="text-center mb-12">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="px-10 py-3.5 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300"
+              style={{
+                background: colors.gold,
+                color: colors.maroon,
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              Show More Photos
+            </button>
+          </div>
+        )}
 
         {/* CTA */}
         <div className="text-center">

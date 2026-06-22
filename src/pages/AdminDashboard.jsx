@@ -6,6 +6,8 @@ import { compressImage } from '../lib/compressImage'
 
 const TABS = ['Dashboard', 'Colors', 'Navbar', 'Hero', 'About', 'Stats', 'Services', 'Portfolio', 'Process', 'Testimonials', 'Gallery Section', 'Contact', 'Footer', 'Gallery', 'Inquiries']
 
+const INQUIRIES_PAGE_SIZE = 20
+
 function friendlyUploadError(e) {
   const msg = e?.message || String(e)
   if (/exceed|too large|maximum allowed size|payload too large/i.test(msg)) {
@@ -188,6 +190,7 @@ export default function AdminDashboard() {
 
   const [inquiries, setInquiries] = useState([])
   const [inquiriesLoading, setInquiriesLoading] = useState(false)
+  const [inquiriesVisibleCount, setInquiriesVisibleCount] = useState(INQUIRIES_PAGE_SIZE)
   const [expandedInquiry, setExpandedInquiry] = useState(null)
 
   const [dashStats, setDashStats] = useState({ total: 0, newThisWeek: 0, galleryCount: 0, recent: [], breakdown: {}, weekly: Array(7).fill(0) })
@@ -336,6 +339,7 @@ export default function AdminDashboard() {
     setInquiriesLoading(true)
     const { data } = await supabase.from('contacts').select('*').order('created_at', { ascending: false })
     if (data) setInquiries(data)
+    setInquiriesVisibleCount(INQUIRIES_PAGE_SIZE)
     setInquiriesLoading(false)
   }
 
@@ -1807,7 +1811,7 @@ export default function AdminDashboard() {
                   <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>No inquiries yet.</p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {inquiries.map(inq => (
+                    {inquiries.slice(0, inquiriesVisibleCount).map(inq => (
                       <div key={inq.id} style={{ border: '1px solid #e5e7eb', borderRadius: '2px', overflow: 'hidden' }}>
                         {/* Header row */}
                         <div
@@ -1871,6 +1875,18 @@ export default function AdminDashboard() {
                         )}
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {!inquiriesLoading && inquiries.length > inquiriesVisibleCount && (
+                  <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setInquiriesVisibleCount(c => c + INQUIRIES_PAGE_SIZE)}
+                      style={{ fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '0.6rem 1.5rem', border: '1px solid #d4af37', background: 'white', cursor: 'pointer', color: '#7a5f06', fontWeight: 700, fontFamily: "'Lato', sans-serif" }}
+                    >
+                      Load More ({inquiries.length - inquiriesVisibleCount} remaining)
+                    </button>
                   </div>
                 )}
               </div>
