@@ -1495,6 +1495,27 @@ export default function AdminDashboard() {
             </Section>
 
             <div style={{ marginTop: '1.5rem' }} />
+            <Section title="Homepage Preview" onSave={() => doSave('gallerySection', gallerySection)} saving={saving}>
+              <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                A short teaser of recent photos shown on the homepage, with a button leading to the full gallery page.
+              </p>
+              <div className="admin-grid-2">
+                <div>
+                  <label style={labelStyle}>Photos shown on homepage</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={gallerySection.previewCount ?? 8}
+                    onChange={e => setGallerySection(p => ({ ...p, previewCount: Math.max(1, Math.min(20, Number(e.target.value) || 1)) }))}
+                    style={{ ...inputStyle, maxWidth: '140px' }}
+                  />
+                </div>
+                <Field label="Button text" value={gallerySection.previewButton} onChange={v => setGallerySection(p => ({ ...p, previewButton: v }))} />
+              </div>
+            </Section>
+
+            <div style={{ marginTop: '1.5rem' }} />
             <Section title="Instagram Link" onSave={() => doSave('gallerySection', gallerySection)} saving={saving}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', marginBottom: '1.25rem' }}>
                 <input

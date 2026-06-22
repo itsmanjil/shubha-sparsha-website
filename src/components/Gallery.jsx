@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiInstagram, FiImage, FiMail } from 'react-icons/fi'
+import { FiInstagram, FiImage, FiMail, FiArrowRight } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
@@ -31,16 +31,17 @@ const GALLERY_CSS = `
   }
 `
 
-export default function Gallery({ standalone = false }) {
+export default function Gallery({ standalone = false, preview = false }) {
   const navigate = useNavigate()
   const { config } = useSiteConfig()
   const { colors, contactInfo, gallerySection, galleryCategories = [] } = config
   const categories = ['All', ...galleryCategories]
   const pageSize = Math.max(1, Number(gallerySection.pageSize) || 12)
+  const previewCount = Math.max(1, Number(gallerySection.previewCount) || 8)
   const lt = colors.lightText || '#f7ecd0'
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')
-  const [visibleCount, setVisibleCount] = useState(pageSize)
+  const [visibleCount, setVisibleCount] = useState(preview ? previewCount : pageSize)
   const [lastFilter, setLastFilter] = useState(filter)
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function Gallery({ standalone = false }) {
   // Reset to the first page whenever the category filter changes — adjusted
   // during render (React's recommended pattern) rather than in an effect,
   // so it doesn't cause an extra render pass.
-  if (filter !== lastFilter) {
+  if (!preview && filter !== lastFilter) {
     setLastFilter(filter)
     setVisibleCount(pageSize)
   }
@@ -70,10 +71,10 @@ export default function Gallery({ standalone = false }) {
     if (!error && data) setImages(data)
   }
 
-  const filtered = filter === 'All' ? images : images.filter((img) => img.category === filter)
+  const filtered = !preview && filter !== 'All' ? images.filter((img) => img.category === filter) : images
   const visible = filtered.slice(0, visibleCount)
-  const hasMore = filtered.length > visibleCount
-  const placeholderCount = Math.max(0, 6 - visible.length)
+  const hasMore = !preview && filtered.length > visibleCount
+  const placeholderCount = Math.max(0, (preview ? previewCount : 6) - visible.length)
 
   // Sends the visitor to the contact form, optionally pre-filling it. When the
   // contact section is on the current page (gallery embedded in the homepage),
@@ -130,24 +131,26 @@ export default function Gallery({ standalone = false }) {
           )}
 
           {/* Category filter */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className="px-5 py-2 text-xs tracking-[0.2em] uppercase transition-all duration-300"
-                style={{
-                  fontFamily: "'Lato', sans-serif",
-                  background: filter === cat ? colors.gold : 'transparent',
-                  color: filter === cat ? colors.maroon : colors.gold,
-                  border: `1px solid ${colors.gold}`,
-                  fontWeight: filter === cat ? 700 : 400,
-                }}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+          {!preview && (
+            <div className="flex flex-wrap justify-center gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFilter(cat)}
+                  className="px-5 py-2 text-xs tracking-[0.2em] uppercase transition-all duration-300"
+                  style={{
+                    fontFamily: "'Lato', sans-serif",
+                    background: filter === cat ? colors.gold : 'transparent',
+                    color: filter === cat ? colors.maroon : colors.gold,
+                    border: `1px solid ${colors.gold}`,
+                    fontWeight: filter === cat ? 700 : 400,
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Masonry mosaic */}
@@ -203,65 +206,12 @@ export default function Gallery({ standalone = false }) {
           ))}
         </div>
 
-        {/* Show more */}
-        {hasMore && (
-          <div className="text-center mb-12">
-            <button
-              type="button"
-              onClick={() => setVisibleCount((c) => c + pageSize)}
-              className="px-10 py-3.5 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300"
-              style={{
-                background: colors.gold,
-                color: colors.maroon,
-                fontFamily: "'Lato', sans-serif",
-              }}
-            >
-              Show More Photos
-            </button>
-          </div>
-        )}
-
-        {/* Instagram link */}
-        {gallerySection.instagramEnabled !== false && (
+        {preview ? (
+          /* Homepage preview: a single CTA into the full dedicated page */
           <div className="text-center">
-            <a
-              href={contactInfo.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border transition-all duration-300 hover:gap-5"
-              style={{
-                borderColor: colors.gold,
-                color: colors.gold,
-                fontFamily: "'Lato', sans-serif",
-              }}
-            >
-              <FiInstagram />
-              {gallerySection.instagramButton}
-            </a>
-          </div>
-        )}
-
-        {/* Conversion CTA band */}
-        {gallerySection.ctaEnabled !== false && (
-          <div
-            className="mt-16 md:mt-20 text-center px-6 py-12 md:py-16"
-            style={{ border: `1px solid ${colors.gold}40`, background: `${colors.gold}0d` }}
-          >
-            <h3
-              className="text-2xl md:text-3xl font-bold mb-3"
-              style={{ fontFamily: "'Playfair Display', serif", color: lt }}
-            >
-              {gallerySection.ctaHeading}
-            </h3>
-            <p
-              className="max-w-xl mx-auto mb-8"
-              style={{ color: `${lt}b3`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
-            >
-              {gallerySection.ctaText}
-            </p>
             <button
               type="button"
-              onClick={() => goToContact()}
+              onClick={() => navigate('/gallery')}
               className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5"
               style={{
                 background: `linear-gradient(135deg, ${colors.gold}, #b8960c)`,
@@ -269,10 +219,84 @@ export default function Gallery({ standalone = false }) {
                 fontFamily: "'Lato', sans-serif",
               }}
             >
-              <FiMail />
-              {gallerySection.ctaButton}
+              {gallerySection.previewButton || 'View Full Gallery'}
+              <FiArrowRight />
             </button>
           </div>
+        ) : (
+          <>
+            {/* Show more */}
+            {hasMore && (
+              <div className="text-center mb-12">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((c) => c + pageSize)}
+                  className="px-10 py-3.5 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300"
+                  style={{
+                    background: colors.gold,
+                    color: colors.maroon,
+                    fontFamily: "'Lato', sans-serif",
+                  }}
+                >
+                  Show More Photos
+                </button>
+              </div>
+            )}
+
+            {/* Instagram link */}
+            {gallerySection.instagramEnabled !== false && (
+              <div className="text-center">
+                <a
+                  href={contactInfo.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold border transition-all duration-300 hover:gap-5"
+                  style={{
+                    borderColor: colors.gold,
+                    color: colors.gold,
+                    fontFamily: "'Lato', sans-serif",
+                  }}
+                >
+                  <FiInstagram />
+                  {gallerySection.instagramButton}
+                </a>
+              </div>
+            )}
+
+            {/* Conversion CTA band */}
+            {gallerySection.ctaEnabled !== false && (
+              <div
+                className="mt-16 md:mt-20 text-center px-6 py-12 md:py-16"
+                style={{ border: `1px solid ${colors.gold}40`, background: `${colors.gold}0d` }}
+              >
+                <h3
+                  className="text-2xl md:text-3xl font-bold mb-3"
+                  style={{ fontFamily: "'Playfair Display', serif", color: lt }}
+                >
+                  {gallerySection.ctaHeading}
+                </h3>
+                <p
+                  className="max-w-xl mx-auto mb-8"
+                  style={{ color: `${lt}b3`, fontFamily: "'Lato', sans-serif", fontWeight: 300 }}
+                >
+                  {gallerySection.ctaText}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => goToContact()}
+                  className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300 hover:gap-5"
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.gold}, #b8960c)`,
+                    color: colors.maroon,
+                    fontFamily: "'Lato', sans-serif",
+                  }}
+                >
+                  <FiMail />
+                  {gallerySection.ctaButton}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

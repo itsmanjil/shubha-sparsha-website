@@ -9,6 +9,7 @@ import Hero from './components/Hero'
 import About from './components/About'
 import Services from './components/Services'
 import Portfolio from './components/Portfolio'
+import Gallery from './components/Gallery'
 import Testimonials from './components/Testimonials'
 import Process from './components/Process'
 import Contact from './components/Contact'
@@ -50,6 +51,7 @@ function HomePage() {
       <About />
       <Services />
       <Portfolio />
+      <Gallery preview />
       <Testimonials />
       <Process />
       <Contact />

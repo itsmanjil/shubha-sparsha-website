@@ -110,6 +110,8 @@ export const defaultConfig = {
     instagramButton: 'View Full Portfolio on Instagram',
     instagramEnabled: true,
     pageSize: 12,
+    previewCount: 8,
+    previewButton: 'View Full Gallery',
     ctaEnabled: true,
     ctaHeading: 'Inspired by what you see?',
     ctaText: "Let's create something just as beautiful for your celebration.",
