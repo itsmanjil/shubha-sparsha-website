@@ -8,8 +8,6 @@ import { useSiteConfig } from '../contexts/SiteConfigContext'
 const TILE_PATTERN = ['big', 'sm', 'sm', 'tall', 'sm', 'wide', 'sm', 'tall', 'sm', 'sm', 'wide', 'big', 'sm', 'sm']
 const tileClass = (i) => `g-${TILE_PATTERN[i % TILE_PATTERN.length]}`
 
-const PAGE_SIZE = 12
-
 const GALLERY_CSS = `
   .g-masonry {
     display: grid;
@@ -34,10 +32,11 @@ export default function Gallery() {
   const { config } = useSiteConfig()
   const { colors, contactInfo, gallerySection, galleryCategories = [] } = config
   const categories = ['All', ...galleryCategories]
+  const pageSize = Math.max(1, Number(gallerySection.pageSize) || 12)
   const lt = colors.lightText || '#f7ecd0'
   const [images, setImages] = useState([])
   const [filter, setFilter] = useState('All')
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [visibleCount, setVisibleCount] = useState(pageSize)
   const [lastFilter, setLastFilter] = useState(filter)
 
   useEffect(() => {
@@ -56,7 +55,7 @@ export default function Gallery() {
   // so it doesn't cause an extra render pass.
   if (filter !== lastFilter) {
     setLastFilter(filter)
-    setVisibleCount(PAGE_SIZE)
+    setVisibleCount(pageSize)
   }
 
   async function fetchImages() {
@@ -179,7 +178,7 @@ export default function Gallery() {
           <div className="text-center mb-12">
             <button
               type="button"
-              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              onClick={() => setVisibleCount((c) => c + pageSize)}
               className="px-10 py-3.5 text-sm tracking-[0.2em] uppercase font-semibold transition-all duration-300"
               style={{
                 background: colors.gold,

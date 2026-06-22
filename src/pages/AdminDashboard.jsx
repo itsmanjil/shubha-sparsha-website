@@ -1478,6 +1478,20 @@ export default function AdminDashboard() {
                 <Field label="Title — italic accent word" value={gallerySection.titleAccent} onChange={v => setGallerySection(p => ({ ...p, titleAccent: v }))} />
               </div>
               <Field label="Instagram button text" value={gallerySection.instagramButton} onChange={v => setGallerySection(p => ({ ...p, instagramButton: v }))} />
+              <div>
+                <label style={labelStyle}>Photos shown per page</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={gallerySection.pageSize ?? 12}
+                  onChange={e => setGallerySection(p => ({ ...p, pageSize: Math.max(1, Math.min(60, Number(e.target.value) || 1)) }))}
+                  style={{ ...inputStyle, maxWidth: '140px' }}
+                />
+                <p style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '0.4rem', fontFamily: "'Lato', sans-serif" }}>
+                  How many photos appear before visitors need to click "Show More" — applies per category.
+                </p>
+              </div>
             </Section>
 
             <div style={{ marginTop: '1.5rem' }} />

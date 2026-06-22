@@ -102,6 +102,7 @@ export const defaultConfig = {
     title: 'Event',
     titleAccent: 'Portfolio',
     instagramButton: 'View Full Portfolio on Instagram',
+    pageSize: 12,
   },
   galleryCategories: ['Weddings', 'Birthdays', 'Corporate', 'Ceremonies'],
   contactInfo: {
