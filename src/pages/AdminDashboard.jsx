@@ -23,7 +23,7 @@ const SECTION_OPTIONS = [
   { id: 'about', name: 'About' },
   { id: 'services', name: 'Services' },
   { id: 'portfolio', name: 'Portfolio' },
-  { id: 'gallery', name: 'Gallery' },
+  { id: '/gallery', name: 'Gallery (full page)' },
   { id: 'testimonials', name: 'Testimonials' },
   { id: 'process', name: 'How It Works' },
   { id: 'contact', name: 'Contact' },

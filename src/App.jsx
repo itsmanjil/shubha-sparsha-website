@@ -1,5 +1,5 @@
-import { Suspense, lazy } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Suspense, lazy, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { SiteConfigProvider } from './contexts/SiteConfigContext'
 import AdminRoute from './components/AdminRoute'
@@ -9,7 +9,6 @@ import Hero from './components/Hero'
 import About from './components/About'
 import Services from './components/Services'
 import Portfolio from './components/Portfolio'
-import Gallery from './components/Gallery'
 import Testimonials from './components/Testimonials'
 import Process from './components/Process'
 import Contact from './components/Contact'
@@ -17,11 +16,33 @@ import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
 import './index.css'
 
-// Lazy-loaded so the admin bundle never ships to public visitors.
+// Lazy-loaded so visitors who never reach the admin or gallery never
+// download their bundles.
 const AdminLogin = lazy(() => import('./pages/AdminLogin'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const GalleryPage = lazy(() => import('./pages/GalleryPage'))
 
 function HomePage() {
+  const location = useLocation()
+
+  // Cross-page anchor navigation: nav/footer links call navigate('/', { state:
+  // { scrollTo: id } }) when clicked from a different page (e.g. /gallery).
+  // Once we land here, scroll to that section and clear the state so a
+  // refresh or back/forward doesn't re-trigger the scroll.
+  useEffect(() => {
+    const target = location.state?.scrollTo
+    if (!target) return
+    const timer = setTimeout(() => {
+      const el = document.getElementById(target)
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 80
+        window.scrollTo({ top: y, behavior: 'smooth' })
+      }
+      window.history.replaceState({}, document.title)
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [location.state])
+
   return (
     <div className="min-h-screen bg-white text-gray-800">
       <Navbar />
@@ -29,7 +50,6 @@ function HomePage() {
       <About />
       <Services />
       <Portfolio />
-      <Gallery />
       <Testimonials />
       <Process />
       <Contact />
@@ -46,6 +66,7 @@ function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route
               path="/admin/dashboard"

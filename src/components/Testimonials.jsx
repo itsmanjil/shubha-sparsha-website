@@ -1,30 +1,29 @@
 import { useSiteConfig } from '../contexts/SiteConfigContext'
-import { darken } from '../lib/color'
 
 export default function Testimonials() {
   const { config } = useSiteConfig()
   const { colors, testimonials = [], testimonialsSection } = config
   const dt = colors.darkText || '#5c4604'
-  const eyebrow = darken(colors.gold, 35)
+  const lt = colors.lightText || '#f7ecd0'
 
   if (!testimonials.length) return null
 
   return (
-    <section id="testimonials" className="py-16 md:py-28" style={{ background: colors.cream }}>
+    <section id="testimonials" className="py-16 md:py-28" style={{ background: colors.maroon }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Section header */}
         <div className="text-center mb-12 md:mb-20">
           <p
             className="text-xs tracking-[0.4em] uppercase mb-4"
-            style={{ color: eyebrow, fontFamily: "'Lato', sans-serif", fontWeight: 700 }}
+            style={{ color: colors.gold, fontFamily: "'Lato', sans-serif" }}
           >
             {testimonialsSection.label}
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold mb-6"
-            style={{ fontFamily: "'Playfair Display', serif", color: colors.maroon }}
+            style={{ fontFamily: "'Playfair Display', serif", color: lt }}
           >
-            {testimonialsSection.title} <em style={{ color: colors.maroon500 }}>{testimonialsSection.titleAccent}</em>
+            {testimonialsSection.title} <em style={{ color: colors.gold }}>{testimonialsSection.titleAccent}</em>
           </h2>
           <div className="flex items-center justify-center gap-4">
             <div className="h-px w-16" style={{ background: colors.gold }} />

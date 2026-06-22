@@ -1,11 +1,46 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-scroll'
-import { useNavigate } from 'react-router-dom'
+import { Link as ScrollLink } from 'react-scroll'
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
+// Renders a nav entry that adapts to where the visitor currently is:
+// - id starting with "/" is a real page (e.g. the Gallery page) -> router Link
+// - otherwise it's a homepage section anchor:
+//   - already on "/" -> react-scroll smooth-scrolls in place
+//   - on another page (e.g. /gallery) -> navigates home and asks HomePage
+//     to scroll to that section once it mounts (see App.jsx)
+function NavEntry({ id, label, isHome, navigate, className, style, onClick }) {
+  if (id.startsWith('/')) {
+    return (
+      <RouterLink to={id} className={className} style={style} onClick={onClick}>
+        {label}
+      </RouterLink>
+    )
+  }
+  if (isHome) {
+    return (
+      <ScrollLink to={id} smooth duration={600} offset={-80} className={`cursor-pointer ${className}`} style={style} onClick={onClick}>
+        {label}
+      </ScrollLink>
+    )
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => { navigate('/', { state: { scrollTo: id } }); onClick?.() }}
+      className={`cursor-pointer text-left ${className}`}
+      style={style}
+    >
+      {label}
+    </button>
+  )
+}
+
 export default function Navbar() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const isHome = location.pathname === '/'
   const { config } = useSiteConfig()
   const { colors, navbar, navLinks = [] } = config
   const lt = colors.lightText || '#f7ecd0'
@@ -21,7 +56,7 @@ export default function Navbar() {
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
-      style={{ background: scrolled ? `${colors.maroon500}f2` : 'transparent', backdropFilter: scrolled ? 'blur(8px)' : 'none' }}
+      style={{ background: scrolled || !isHome ? `${colors.maroon500}f2` : 'transparent', backdropFilter: scrolled || !isHome ? 'blur(8px)' : 'none' }}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="text-left flex items-center gap-3">
@@ -62,36 +97,32 @@ export default function Navbar() {
         <ul className="hidden lg:flex gap-8 items-center">
           {navLinks.map((link) => (
             <li key={link.id}>
-              <Link
-                to={link.id}
-                smooth
-                duration={600}
-                offset={-80}
-                className="cursor-pointer text-sm tracking-widest uppercase transition-colors"
+              <NavEntry
+                id={link.id}
+                label={link.label}
+                isHome={isHome}
+                navigate={navigate}
+                className="text-sm tracking-widest uppercase transition-colors"
                 style={{ color: `${lt}cc`, fontFamily: "'Lato', sans-serif" }}
-              >
-                {link.label}
-              </Link>
+              />
             </li>
           ))}
         </ul>
 
         {/* Book now CTA */}
         <div className="hidden lg:block">
-          <Link
-            to="contact"
-            smooth
-            duration={600}
-            offset={-80}
-            className="cursor-pointer px-6 py-2 text-xs tracking-[0.2em] uppercase font-semibold transition-all"
+          <NavEntry
+            id="contact"
+            label={navbar.ctaButton}
+            isHome={isHome}
+            navigate={navigate}
+            className="px-6 py-2 text-xs tracking-[0.2em] uppercase font-semibold transition-all"
             style={{
               background: `linear-gradient(135deg, ${colors.gold}, #b8960c)`,
               color: colors.maroon,
               fontFamily: "'Lato', sans-serif",
             }}
-          >
-            {navbar.ctaButton}
-          </Link>
+          />
         </div>
 
         {/* Mobile toggle */}
@@ -114,17 +145,15 @@ export default function Navbar() {
           <ul className="flex flex-col gap-5">
             {navLinks.map((link) => (
               <li key={link.id}>
-                <Link
-                  to={link.id}
-                  smooth
-                  duration={600}
-                  offset={-80}
-                  className="cursor-pointer text-sm tracking-widest uppercase"
+                <NavEntry
+                  id={link.id}
+                  label={link.label}
+                  isHome={isHome}
+                  navigate={navigate}
+                  className="text-sm tracking-widest uppercase"
                   style={{ color: `${lt}cc`, fontFamily: "'Lato', sans-serif" }}
                   onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </Link>
+                />
               </li>
             ))}
           </ul>

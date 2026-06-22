@@ -1,8 +1,32 @@
-import { Link } from 'react-scroll'
+import { Link as ScrollLink } from 'react-scroll'
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import { FiInstagram, FiMail } from 'react-icons/fi'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
+// Same cross-page logic as Navbar: page links use the router, section
+// anchors smooth-scroll on the homepage or navigate-then-scroll elsewhere.
+function FooterLink({ id, label, isHome, navigate, className, style }) {
+  if (id.startsWith('/')) {
+    return <RouterLink to={id} className={className} style={style}>{label}</RouterLink>
+  }
+  if (isHome) {
+    return (
+      <ScrollLink to={id} smooth duration={600} offset={-80} className={`cursor-pointer ${className}`} style={style}>
+        {label}
+      </ScrollLink>
+    )
+  }
+  return (
+    <button type="button" onClick={() => navigate('/', { state: { scrollTo: id } })} className={`cursor-pointer text-left ${className}`} style={style}>
+      {label}
+    </button>
+  )
+}
+
 export default function Footer() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isHome = location.pathname === '/'
   const { config } = useSiteConfig()
   const { colors, footer, contactInfo, navLinks = [] } = config
   const lt = colors.lightText || '#f7ecd0'
@@ -47,19 +71,14 @@ export default function Footer() {
             <ul className="space-y-3">
               {navLinks.map(({ id, label }) => (
                 <li key={id}>
-                  <Link
-                    to={id}
-                    smooth
-                    duration={600}
-                    offset={-80}
-                    className="cursor-pointer text-sm capitalize transition-colors"
-                    style={{
-                      color: `${lt}99`,
-                      fontFamily: "'Lato', sans-serif",
-                    }}
-                  >
-                    {label}
-                  </Link>
+                  <FooterLink
+                    id={id}
+                    label={label}
+                    isHome={isHome}
+                    navigate={navigate}
+                    className="text-sm capitalize transition-colors"
+                    style={{ color: `${lt}99`, fontFamily: "'Lato', sans-serif" }}
+                  />
                 </li>
               ))}
             </ul>

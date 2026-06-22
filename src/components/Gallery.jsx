@@ -30,7 +30,7 @@ const GALLERY_CSS = `
   }
 `
 
-export default function Gallery() {
+export default function Gallery({ standalone = false }) {
   const { config } = useSiteConfig()
   const { colors, contactInfo, gallerySection, galleryCategories = [] } = config
   const categories = ['All', ...galleryCategories]
@@ -79,7 +79,11 @@ export default function Gallery() {
   }
 
   return (
-    <section id="gallery" className="py-16 md:py-28" style={{ background: colors.maroon }}>
+    <section
+      id="gallery"
+      className={standalone ? 'pt-28 md:pt-40 pb-16 md:pb-28' : 'py-16 md:py-28'}
+      style={{ background: colors.maroon }}
+    >
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-10 md:mb-16">

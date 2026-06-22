@@ -27,7 +27,7 @@ export const defaultConfig = {
     { id: 'about', label: 'About' },
     { id: 'services', label: 'Services' },
     { id: 'portfolio', label: 'Portfolio' },
-    { id: 'gallery', label: 'Gallery' },
+    { id: '/gallery', label: 'Gallery' },
     { id: 'contact', label: 'Contact' },
   ],
   eventTypes: ['Wedding', 'Birthday', 'Corporate Event', 'Religious Ceremony', 'Engagement', 'Other'],
