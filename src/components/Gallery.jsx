@@ -3,28 +3,30 @@ import { FiInstagram, FiImage, FiMail } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { useSiteConfig } from '../contexts/SiteConfigContext'
 
-// Masonry tile sizes — cycled by index so heroes appear large and fillers small.
-// grid-auto-flow: dense backfills any gaps the varied spans create.
-const TILE_PATTERN = ['big', 'sm', 'sm', 'tall', 'sm', 'wide', 'sm', 'tall', 'sm', 'sm', 'wide', 'big', 'sm', 'sm']
+// Masonry tile heights — cycled by index so heroes read larger and fillers
+// smaller. Uses CSS multi-column layout (not CSS Grid spans): each tile just
+// flows into the next column with no spanning, so unlike grid-auto-flow:
+// dense, there's no way for leftover cells to appear regardless of how many
+// photos exist — column layout can't leave gaps.
+const TILE_PATTERN = ['big', 'sm', 'tall', 'sm', 'big', 'tall', 'sm', 'sm']
 const tileClass = (i) => `g-${TILE_PATTERN[i % TILE_PATTERN.length]}`
 
 const GALLERY_CSS = `
   .g-masonry {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 150px;
-    grid-auto-flow: dense;
-    gap: 12px;
+    column-count: 2;
+    column-gap: 12px;
   }
   .g-tile {
-    position: relative; overflow: hidden; display: block; width: 100%; height: 100%;
-    padding: 0; margin: 0; border: none; background: none; cursor: pointer; font: inherit;
+    position: relative; overflow: hidden; display: block; width: 100%;
+    padding: 0; margin: 0 0 12px; border: none; background: none; cursor: pointer; font: inherit;
+    break-inside: avoid;
   }
-  .g-big { grid-column: span 2; grid-row: span 2; }
-  .g-tall { grid-row: span 2; }
-  .g-wide { grid-column: span 2; }
+  .g-sm { aspect-ratio: 1 / 1; }
+  .g-tall { aspect-ratio: 3 / 4; }
+  .g-big { aspect-ratio: 4 / 5; }
   @media (min-width: 768px) {
-    .g-masonry { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 180px; gap: 16px; }
+    .g-masonry { column-count: 4; column-gap: 16px; }
+    .g-tile { margin-bottom: 16px; }
   }
 `
 
