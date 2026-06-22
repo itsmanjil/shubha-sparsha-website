@@ -5,10 +5,11 @@ export const defaultConfig = {
   colors: {
     // maroon and lightText are pixel-sampled from the uploaded logo
     // (logo/logo.png) so the navbar/footer background and lettering match
-    // it exactly. maroon500 is the same hue scaled brighter, not just
-    // lightened, so gradients/accents stay in the same warm family.
+    // it exactly. maroon500 is the same hue/saturation via HSL, with
+    // lightness matched to the original accent's richness (~28%) rather
+    // than a flat RGB scale, which read as washed-out/faded.
     maroon: '#540C0D',
-    maroon500: '#B91A1D',
+    maroon500: '#7D1213',
     gold: '#d4af37',
     cream: '#fffdf5',
     lightText: '#F9EFD6',
