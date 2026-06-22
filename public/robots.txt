@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+
+Sitemap: https://shubhasparshanepal.vercel.app/sitemap.xml

@@ -57,6 +57,8 @@ export default function Portfolio() {
                   <img
                     src={entry.coverImage}
                     alt={entry.name}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
                     className="w-full aspect-[4/3] object-cover"
                   />
                 ) : (

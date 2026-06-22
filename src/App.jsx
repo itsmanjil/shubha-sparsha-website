@@ -1,7 +1,9 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { SiteConfigProvider } from './contexts/SiteConfigContext'
 import AdminRoute from './components/AdminRoute'
+import NotFound from './pages/NotFound'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -53,8 +55,10 @@ function App() {
                 </AdminRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <Analytics />
       </SiteConfigProvider>
     </BrowserRouter>
   )

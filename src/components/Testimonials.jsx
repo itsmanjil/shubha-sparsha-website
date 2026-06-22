@@ -56,7 +56,7 @@ export default function Testimonials() {
               </p>
               <div className="flex items-center gap-3 pt-4" style={{ borderTop: `1px solid ${colors.gold}26` }}>
                 {t.photoUrl ? (
-                  <img src={t.photoUrl} alt="" className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
+                  <img src={t.photoUrl} alt="" loading="lazy" decoding="async" className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
                 ) : (
                   <div
                     className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
